@@ -66,8 +66,9 @@ int run_server(int port, int queue_size) {
                  MSG_WAITALL, ( struct sockaddr *) &cliaddr, &len);
     msg[n] = '\0';
     printf("Receive things back from sender.\n");
-    int header_len = n;
+
     PacketHeader *head = (PacketHeader*)msg;
+    int header_len = sizeof(*head);
     if(head->type == 0){
         head->type = 3;
 //        printf("%d\n",head->seqNum);
@@ -94,7 +95,7 @@ int run_server(int port, int queue_size) {
         msg[n] = '\0';
         printf("Received message lenght: %d\n", n);
         // Get out the header
-        printf("Header length: %d", header_len);
+        printf("Header length: %d\n", header_len);
         for(int i = 0; i < header_len; i++){
             recv_header_msg[i] = msg[i];
         }
