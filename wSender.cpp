@@ -120,7 +120,7 @@ int send_start(const char *hostname, int port) {
             header.seqNum = seqNum;
             header.type = 2;
             header.length = sizeof(packets[seqNum]);
-            char *message = (char*)malloc(sizeof(header))
+            char *message = (char*)malloc(sizeof(header));
             memcpy(message, &header, sizeof(header));
             printf("%s\n",message);
             strcat(message,packets[seqNum]);
