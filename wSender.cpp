@@ -63,7 +63,7 @@ int send_start(const char *hostname, int port) {
     n = recvfrom(sockfd, (char *)buf, 1024,
              MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
     buf[n] = '\0';
-
+    printf("%s\n",buf);
     PacketHeader *ack = (PacketHeader*)buf;
 //    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
     if(ack->type == 3 && head.seqNum == ack->seqNum) {
