@@ -33,7 +33,7 @@ int send_start(const char *hostname, int port) {
 
     // (2) Create a sockaddr_in to specify remote host and port
     struct sockaddr_in addr;
-    memset(&servaddr, 0, sizeof(addr));
+    memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     struct hostent *host = gethostbyname(hostname);
     if (host == nullptr) {
@@ -56,7 +56,7 @@ int send_start(const char *hostname, int port) {
     buf[n] = '\0';
 
     PacketHeader *ack = (PacketHeader*)buf;
-    if(ack.type == 3 && head.seqNum == ack->seqNum) {
+    if(ack->type == 3 && head.seqNum == ack->seqNum) {
         printf("Connection start!");
     }else{
         // (5) Close connection
