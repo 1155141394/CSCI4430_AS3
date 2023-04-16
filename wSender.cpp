@@ -26,7 +26,7 @@ int send_start(const char *hostname, int port) {
     PacketHeader head;
     head.type = 0;
     head.seqNum = rand();
-    printf("%d\n",head.seqNum);
+//    printf("%d\n",head.seqNum);
     head.length = 0;
     int n;
     // 首先需要定义一个变量
