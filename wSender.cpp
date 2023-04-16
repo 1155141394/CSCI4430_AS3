@@ -91,7 +91,7 @@ int send_start(const char *hostname, int port) {
 
     // read data as a block:
     int flag = 0;
-    while (True) {
+    while (true) {
         is.read(buffer, packet_length);
         if(!is){
             break;
