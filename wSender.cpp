@@ -97,12 +97,12 @@ int send_start(const char *hostname, int port) {
             break;
         }
         strcpy(packets[flag],buffer);
-        printf("%s\n",packets[flag]);
+//        printf("%s\n",packets[flag]);
         flag++;
     }
     buffer[is.gcount()] = '\0';
     strcpy(packets[flag],buffer);
-    printf("Final packet only have %ld\n", is.gcount());
+//    printf("Final packet only have %ld\n", is.gcount());
     is.close();
     printf("Begin send");
     int seqNum = 0;
