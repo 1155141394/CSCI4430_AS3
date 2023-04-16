@@ -100,7 +100,7 @@ int send_start(const char *hostname, int port) {
     strcpy(packets[flag],buffer);
 //        printf("Final packet only have %ld\n", is.gcount());
     is.close();
-
+    printf("Begin send");
     int seqNum = 0;
     for(int i=0;i<WINDOWS;i++){
         PacketHeader header;
