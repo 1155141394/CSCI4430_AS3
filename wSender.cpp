@@ -125,7 +125,7 @@ int send_start(const char *hostname, int port) {
 
             strcat(message,packets[seqNum]);
             printf("%s\n",message);
-            sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+            sendto(sockfd, message, strlen(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
             break;
         }
         break;
