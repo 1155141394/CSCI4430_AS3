@@ -68,7 +68,7 @@ int run_server(int port, int queue_size) {
         head->type = 3;
         // 首先需要定义一个变量
         char ack[1024] = { 0 };
-        memcpy(ack, &head, sizeof(head));
+        memcpy(ack, head, sizeof(*head));
         sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
         printf("ack back!");
     }
