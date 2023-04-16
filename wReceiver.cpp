@@ -65,6 +65,7 @@ int run_server(int port, int queue_size) {
     n = recvfrom(sockfd, (char *)msg, 1024,
                  MSG_WAITALL, ( struct sockaddr *) &cliaddr, &len);
     msg[n] = '\0';
+    printf("Receive things back from sender.\n");
     int header_len = n;
     PacketHeader *head = (PacketHeader*)msg;
     if(head->type == 0){
