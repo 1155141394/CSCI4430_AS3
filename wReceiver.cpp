@@ -82,8 +82,8 @@ int run_server(int port, int queue_size) {
     char ack[1024] = { 0 };
     ack_header -> type = 3;
     ack_header ->length = 0;
-    char data[2000] = '0';
-    char recv_header_msg[100] = '0';
+    char data[2000] = {0};
+    char recv_header_msg[100] = {0};
     int seq_num = 0;
     while(1){
         // receive data from sender
