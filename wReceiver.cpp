@@ -99,7 +99,6 @@ int run_server(int port, int queue_size) {
         printf("Header length: %d\n", header_len);
         for(int i = 0; i < header_len; i++){
             recv_header_msg[i] = msg[i];
-            printf("%d\n",msg[i]);
         }
         PacketHeader *recv_header = (PacketHeader*)recv_header_msg;
         int len = recv_header->length;
