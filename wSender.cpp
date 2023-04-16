@@ -108,7 +108,7 @@ int send_start(const char *hostname, int port) {
         header.length = sizeof(packets[seqNum]);
         char message[1500] = { 0 };
         memcpy(message, &header, sizeof(header));
-        strcat(message,packets[seqNum])
+        strcat(message,packets[seqNum]);
         sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
     }
 
