@@ -90,7 +90,7 @@ int run_server(int port, int queue_size) {
         printf("Start for loop.\n");
         // receive data from sender
         n = recvfrom(sockfd, (char *)msg, MAXSIZE,
-                     MSG_DONTWAIT, ( struct sockaddr *) &cliaddr, &len);
+                     MSG_NOSIGNAL, ( struct sockaddr *) &cliaddr, &len);
         msg[n] = '\0';
         printf("Received message lenght: %d\n", n);
         // Get out the header
@@ -111,7 +111,7 @@ int run_server(int port, int queue_size) {
             printf("Data: %s\n", data);
             ack_header.seqNum = seq_num + 1;
             memcpy(ack, &ack_header, sizeof(*head));
-            sendto(sockfd, ack, sizeof(ack), MSG_DONTWAIT, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
+            sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
         }
         else {
             printf("Not received package\n");
