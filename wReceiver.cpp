@@ -6,6 +6,7 @@
 #include <unistd.h>		// close()
 #include <netdb.h>
 #include <netinet/in.h>
+#include <cstdio>
 
 #include "PacketHeader.h"
 
