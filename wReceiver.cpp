@@ -10,6 +10,8 @@
 
 #include "PacketHeader.h"
 
+#define MAXSIZE 1472
+
 int get_port_number(int sockfd) {
     struct sockaddr_in addr;
     socklen_t length = sizeof(addr);
@@ -63,7 +65,7 @@ int run_server(int port, int queue_size) {
     n = recvfrom(sockfd, (char *)msg, 1024,
                  MSG_WAITALL, ( struct sockaddr *) &cliaddr, &len);
     msg[n] = '\0';
-
+    int header_len = n;
     PacketHeader *head = (PacketHeader*)msg;
     if(head->type == 0){
         head->type = 3;
@@ -74,6 +76,48 @@ int run_server(int port, int queue_size) {
         sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
         printf("ack back!");
     }
+
+    // Start receive data
+    PacketHeader *ack_header;
+    char ack[1024] = { 0 };
+    ack_header -> type = 3;
+    ack_header ->length = 0;
+    char data[2000] = '0';
+    char recv_header_msg[100] = '0';
+    int seq_num = 0;
+    while(1){
+        // receive data from sender
+        n = recvfrom(sockfd, (char *)msg, MAXSIZE,
+                     MSG_DONTWAIT, ( struct sockaddr *) &cliaddr, &len);
+        msg[n] = '\0';
+        printf("Received message lenght: %d\n", n);
+        // Get out the header
+        for(int i = 0; i < header_len; i++){
+            recv_header_msg[i] = msg[i];
+        }
+        PacketHeader *recv_header = (PacketHeader*)recv_header_msg;
+        int len = recv_header->length;
+        printf("Current seq_num: %d, Received seq_num: %d\n", recv_header->seqNum, seq_num);
+        if (recv_header->seqNum == seq_num + 1) {
+            printf("Received package successfully.\n");
+            seq_num = recv_header->seqNum;
+
+            // get out the data part
+            for(int i = 0; i < len; i++){
+                data[i] = msg[header_len + i];
+            }
+            printf("Data: %s\n", data);
+            ack_header->seqNum = seq_num + 1;
+            memcpy(ack, ack_header, sizeof(*head));
+            sendto(sockfd, ack, sizeof(ack), MSG_DONTWAIT, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
+        }
+        else {
+            printf("Not received package\n");
+            continue;
+        }
+
+    }
+
     return 0;
 }
 
