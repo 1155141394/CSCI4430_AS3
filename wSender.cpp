@@ -74,7 +74,7 @@ int send_start(const char *hostname, int port) {
 
 
 
-    PacketHeader head;
+
     int packet_length = 1472 - sizeof(head);
 
     std::ifstream is ("test.txt", std::ifstream::binary);
