@@ -119,7 +119,7 @@ int send_start(const char *hostname, int port) {
             PacketHeader header;
             header.seqNum = seqNum;
             header.type = 2;
-            header.length = sizeof(packets[seqNum]);
+            header.length = strlen(packets[seqNum]);
             char message[1472] = {0};
             memcpy(message, &header, sizeof(header));
 
