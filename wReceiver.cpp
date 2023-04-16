@@ -94,6 +94,7 @@ int run_server(int port, int queue_size) {
         msg[n] = '\0';
         printf("Received message lenght: %d\n", n);
         // Get out the header
+        printf("Header length: %d", header_len);
         for(int i = 0; i < header_len; i++){
             recv_header_msg[i] = msg[i];
         }
