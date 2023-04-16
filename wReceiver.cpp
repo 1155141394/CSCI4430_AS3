@@ -90,6 +90,7 @@ int run_server(int port, int queue_size) {
     while(1){
         printf("Start for loop.\n");
         // receive data from sender
+        memset(msg, 0, 1024);
         n = recvfrom(sockfd, (char *)msg, MAXSIZE,
                      MSG_NOSIGNAL, ( struct sockaddr *) &cliaddr, &len);
         msg[n] = '\0';
@@ -101,6 +102,7 @@ int run_server(int port, int queue_size) {
         }
         PacketHeader *recv_header = (PacketHeader*)recv_header_msg;
         int len = recv_header->length;
+        printf("Data length: %d\n", len);
         printf("Current seq_num: %d, Received seq_num: %d\n", recv_header->seqNum, seq_num);
         if (recv_header->seqNum == seq_num + 1) {
             printf("Received package successfully.\n");
