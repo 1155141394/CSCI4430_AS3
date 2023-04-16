@@ -122,7 +122,7 @@ int send_start(const char *hostname, int port) {
             header.length = sizeof(packets[seqNum]);
             char message[1800] = { 0 };
             memcpy(message, &header, sizeof(header));
-            printf("%s\n",message);
+            printf("%d\n",message);
             strcat(message,packets[seqNum]);
             printf("%d\n",strlen(message));
             sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));

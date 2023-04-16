@@ -90,7 +90,7 @@ int run_server(int port, int queue_size) {
     while(1){
         printf("Start for loop.\n");
         // receive data from sender
-        memset(msg, 0, 1024);
+        memset(msg, 0, 1472);
         n = recvfrom(sockfd, (char *)msg, MAXSIZE,
                      MSG_NOSIGNAL, ( struct sockaddr *) &cliaddr, &len);
         msg[n] = '\0';
