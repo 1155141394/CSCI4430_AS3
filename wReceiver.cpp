@@ -100,7 +100,7 @@ int run_server(int port, int queue_size) {
         for(int i = 0; i < header_len; i++){
             recv_header_msg[i] = msg[i];
         }
-        PacketHeader *recv_header = (PacketHeader*)msg;
+        PacketHeader *recv_header = (PacketHeader*)recv_header_msg;
         int len = recv_header->length;
         printf("Data length: %d\n", len);
         printf("Current seq_num: %d, Received seq_num: %d\n", recv_header->seqNum, seq_num);
