@@ -94,7 +94,7 @@ int send_start(const char *hostname, int port) {
     while (is) {
         is.read(buffer, packet_length);
         strcpy(packets[flag],buffer);
-        printf("%s\n",packets[flag])
+        printf("%s\n",packets[flag]);
         flag++;
     }
     buffer[is.gcount()] = '\0';
