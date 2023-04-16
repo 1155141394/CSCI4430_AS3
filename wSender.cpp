@@ -60,7 +60,7 @@ int send_start(const char *hostname, int port) {
         printf("Connection start!");
     }else{
         // (5) Close connection
-        printf("Start failed.\n")
+        printf("Start failed.\n");
         close(sockfd);
     }
 
