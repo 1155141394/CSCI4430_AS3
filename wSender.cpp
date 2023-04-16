@@ -9,6 +9,7 @@
 #include <iostream>     // std::cout
 #include <fstream>      // std::ifstream
 #include <cstdio>
+#include <time.h>
 #include <chrono>
 #include "PacketHeader.h"
 
@@ -21,6 +22,7 @@ static const int WINDOWS = 3;
 
 int send_start(const char *hostname, int port) {
 
+    srand((unsigned)time(NULL));
     PacketHeader head;
     head.type = 0;
     head.seqNum = rand();
