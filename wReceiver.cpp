@@ -24,7 +24,7 @@ int get_port_number(int sockfd) {
 int run_server(int port, int queue_size) {
 
     // (1) Create socket
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd == -1) {
         perror("Error opening stream socket");
         return -1;
@@ -38,53 +38,42 @@ int run_server(int port, int queue_size) {
     }
 
     // (3) Create a sockaddr_in struct for the proper port and bind() to it.
-    struct sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = htons(port);
+    struct sockaddr_in servaddr, cliaddr;
+
+    memset(&servaddr, 0, sizeof(servaddr));
+    memset(&cliaddr, 0, sizeof(cliaddr));
+
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = INADDR_ANY;
+    servaddr.sin_port = htons(port);
 
     // (3b) Bind to the port.
-    if (bind(sockfd, (sockaddr *) &addr, sizeof(addr)) == -1) {
+    if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) == -1) {
         perror("Error binding stream socket");
         return -1;
     }
+    socklen_t len;
+    int n;
+    len = sizeof(cliaddr);
 
-    // (3c) Detect which port was chosen.
-    port = get_port_number(sockfd);
-    printf("Server listening on port %d...\n", port);
+    // receive datagram from client
 
-    // (4) Begin listening for incoming connections.
-    listen(sockfd, queue_size);
-
-    // (5) Serve incoming connections one by one forever.
-    while (true) {
-        int connectionfd = accept(sockfd, 0, 0);
-        if (connectionfd == -1) {
-            perror("Error accepting connection");
-            return -1;
-        }
-
-        // (1) Receive message from client.
-
-        while(1){
-            char msg[1024] = { 0 };
-            int rev = recv(connectionfd, msg, strlen(msg), 0);
-            if(rev<=0){
-                close(connectfd);
-                break;
-            }
-            PacketHeader *head = (PacketHeader*)msg;
-            if(head->type == 0){
-                head->type = 3;
-                // 首先需要定义一个变量
-                char ack[1024] = { 0 };
-                memcpy(ack, &head, sizeof(head));
-                send(connectionfd,ack,strlen(ack),0);
-                printf("ack back!");
-            }
-        }
-
-        // (4) Close connection
-        close(connectionfd);
+    char msg[1024] = { 0 };
+    n = recvfrom(sockfd, (char *)msg, 1024,
+                 MSG_WAITALL, ( struct sockaddr *) &cliaddr, &len);
+    msg[n] = '\0';
+    if(rev<=0){
+        close(connectfd);
+        printf("Server failed.\n");
     }
+    PacketHeader *head = (PacketHeader*)msg;
+    if(head->type == 0){
+        head->type = 3;
+        // 首先需要定义一个变量
+        char ack[1024] = { 0 };
+        memcpy(ack, &head, sizeof(head));
+        send(connectionfd,ack,strlen(ack),0);
+        printf("ack back!");
+    }
+    return 0;
 }
