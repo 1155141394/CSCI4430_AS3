@@ -71,7 +71,7 @@ int run_server(int port, int queue_size) {
     int header_len = sizeof(*head);
     if(head->type == 0){
         head->type = 3;
-//        printf("%d\n",head->seqNum);
+        printf("%d\n",head->seqNum);
         // 首先需要定义一个变量
         char ack[1024] = { 0 };
         memcpy(ack, head, sizeof(*head));
