@@ -70,23 +70,24 @@ int run_server(int port, int queue_size) {
     PacketHeader *head = (PacketHeader*)msg;
     if(head->type == 0){
         head->type = 3;
-        printf("%d\n",head->seqNum);
+//        printf("%d\n",head->seqNum);
         // 首先需要定义一个变量
         char ack[1024] = { 0 };
         memcpy(ack, head, sizeof(*head));
         sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
-        printf("ack back!");
+        printf("ack back!\n");
     }
 
 //     Start receive data
-    PacketHeader *ack_header;
+    PacketHeader ack_header;
     char ack[1024] = { 0 };
-    ack_header -> type = 3;
-    ack_header ->length = 0;
+    ack_header.type = 3;
+    ack_header.length = 0;
     char data[2000] = {0};
     char recv_header_msg[100] = {0};
     int seq_num = 0;
     while(1){
+        printf("Start for loop.\n");
         // receive data from sender
         n = recvfrom(sockfd, (char *)msg, MAXSIZE,
                      MSG_DONTWAIT, ( struct sockaddr *) &cliaddr, &len);
@@ -108,8 +109,8 @@ int run_server(int port, int queue_size) {
                 data[i] = msg[header_len + i];
             }
             printf("Data: %s\n", data);
-            ack_header->seqNum = seq_num + 1;
-            memcpy(ack, ack_header, sizeof(*head));
+            ack_header.seqNum = seq_num + 1;
+            memcpy(ack, &ack_header, sizeof(*head));
             sendto(sockfd, ack, sizeof(ack), MSG_DONTWAIT, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
         }
         else {
