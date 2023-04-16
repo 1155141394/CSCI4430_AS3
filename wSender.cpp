@@ -11,6 +11,8 @@
 #include <cstdio>
 
 #include "PacketHeader.h"
+using namespace chrono;
+
 static const int MAX_MESSAGE_SIZE = 256;
 
 static const int WINDOWS = 3;
@@ -105,17 +107,50 @@ int send_start(const char *hostname, int port) {
 //    printf("Final packet only have %ld\n", is.gcount());
     is.close();
     printf("Begin send");
+
     int seqNum = 0;
-    for(int i=0;i<WINDOWS;i++){
-        PacketHeader header;
-        header.seqNum = seqNum;
-        header.type = 2;
-        header.length = sizeof(packets[seqNum]);
-        char message[1800] = { 0 };
-        memcpy(message, &header, sizeof(header));
-        strcat(message,packets[seqNum]);
-        sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+    while(true){
+
+        for(int i=0;i<WINDOWS;i++){
+            PacketHeader header;
+            header.seqNum = seqNum;
+            header.type = 2;
+            header.length = sizeof(packets[seqNum]);
+            char message[1800] = { 0 };
+            memcpy(message, &header, sizeof(header));
+            strcat(message,packets[seqNum]);
+            print("%s\n",message);
+            sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+            break;
+        }
+        break;
+//        int seq_list[WINDOWS];
+//        fill_n(seq_list,WINDOWS,-1)
+//        auto start = system_clock::now();
+//        int flag;
+//        for(flag=0;i<WINDOWS;i++){
+//            socklen_t len = sizeof(addr);
+//            char packet_ack[1024] = { 0 };
+//            int n = recvfrom(sockfd, (char *)packet_ack, 1024,
+//                             MSG_DONTWAIT, ( struct sockaddr *) &addr, &len);
+//            packet_ack[n] = '\0';
+//            PacketHeader *ack_head = (PacketHeader*)packet_ack;
+//            seq_list[i] =  ack_head->seqNum;
+//            auto end   = system_clock::now();
+//            auto duration = duration_cast<microseconds>(end - start);
+//            if(double(duration.count())>500){
+//                break;
+//            }
+//        }
+//        if(flag<WINDOWS-1){
+//
+//        }else{
+//            seqNum += WINDOWS;
+//        }
+
     }
+
+
 
 
     return 0;
