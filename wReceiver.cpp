@@ -77,3 +77,8 @@ int run_server(int port, int queue_size) {
     }
     return 0;
 }
+
+int main(){
+    run_server(8080, 10);
+    return 0;
+}

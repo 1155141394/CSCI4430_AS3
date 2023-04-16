@@ -70,3 +70,8 @@ int send_start(const char *hostname, int port) {
 
     return 0;
 }
+
+int main(){
+    send_start("127.0.0.1", 8080);
+    return 0;
+}
