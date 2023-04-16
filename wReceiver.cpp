@@ -7,7 +7,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 
-#include 'PacketHeader.h'
+#include "PacketHeader.h"
 
 int get_port_number(int sockfd) {
     struct sockaddr_in addr;
@@ -62,7 +62,7 @@ int run_server(int port, int queue_size) {
     n = recvfrom(sockfd, (char *)msg, 1024,
                  MSG_WAITALL, ( struct sockaddr *) &cliaddr, &len);
     msg[n] = '\0';
-    if(rev<=0){
+    if(n<=0){
         close(connectfd);
         printf("Server failed.\n");
     }
