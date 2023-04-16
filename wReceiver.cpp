@@ -62,17 +62,14 @@ int run_server(int port, int queue_size) {
     n = recvfrom(sockfd, (char *)msg, 1024,
                  MSG_WAITALL, ( struct sockaddr *) &cliaddr, &len);
     msg[n] = '\0';
-    if(n<=0){
-        close(connectfd);
-        printf("Server failed.\n");
-    }
+
     PacketHeader *head = (PacketHeader*)msg;
     if(head->type == 0){
         head->type = 3;
         // 首先需要定义一个变量
         char ack[1024] = { 0 };
         memcpy(ack, &head, sizeof(head));
-        send(connectionfd,ack,strlen(ack),0);
+        sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
         printf("ack back!");
     }
     return 0;
