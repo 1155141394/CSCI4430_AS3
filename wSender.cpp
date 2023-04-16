@@ -91,15 +91,18 @@ int send_start(const char *hostname, int port) {
 
     // read data as a block:
     int flag = 0;
-    while (is) {
+    while (True) {
         is.read(buffer, packet_length);
+        if(!is){
+            break;
+        }
         strcpy(packets[flag],buffer);
         printf("%s\n",packets[flag]);
         flag++;
     }
     buffer[is.gcount()] = '\0';
     strcpy(packets[flag],buffer);
-//        printf("Final packet only have %ld\n", is.gcount());
+    printf("Final packet only have %ld\n", is.gcount());
     is.close();
     printf("Begin send");
     int seqNum = 0;
