@@ -46,9 +46,8 @@ int send_start(const char *hostname, int port) {
 
     // (4) Send message to remote server
     // Call send() enough times to send all the data
-    ssize_t message_len = strlen(message);
     socklen_t sock_len;
-    sendto(sockfd, message, message_len, MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+    sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
     printf("Start request sent.\n");
     char buf[1024] = { 0 };
     n = recvfrom(sockfd, (char *)buf, 1024,
@@ -56,7 +55,7 @@ int send_start(const char *hostname, int port) {
     buf[n] = '\0';
 
     PacketHeader *ack = (PacketHeader*)buf;
-    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
+//    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
     if(ack->type == 3 && head.seqNum == ack->seqNum) {
         printf("Connection start!");
     }else{
