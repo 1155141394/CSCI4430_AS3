@@ -108,7 +108,7 @@ int send_start(const char *hostname, int port) {
     strcpy(packets[flag],buffer);
 //    printf("Final packet only have %ld\n", is.gcount());
     is.close();
-    printf("Begin send");
+    printf("Begin send\n");
 
     int seqNum = 0;
     while(true){
@@ -120,9 +120,10 @@ int send_start(const char *hostname, int port) {
             header.length = sizeof(packets[seqNum]);
             char message[1800] = { 0 };
             memcpy(message, &header, sizeof(header));
-            message = strcat(message,packets[seqNum]);
-            printf("%s\n",message);
-            sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+            char *packet = (char *) malloc(strlen(message) + strlen(packets[seqNum]));
+            sprintf(packet, "%s%s", message, packets[seqNum]);
+            printf("%s\n",packets);
+            sendto(sockfd, packets, sizeof(packets), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
             break;
         }
         break;
