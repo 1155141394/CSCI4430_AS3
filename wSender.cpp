@@ -30,9 +30,9 @@ int send_start(const char *hostname, int port) {
     head.length = 0;
     int n;
     // 首先需要定义一个变量
-    unsigned char message[1024] = { 0 };
+    char message[1024] = { 0 };
     memcpy(message, (char*)&head, sizeof(head));
-    printf("%s\n",message);
+    printf("%d\n",message);
     if (strlen(message) > MAX_MESSAGE_SIZE) {
         perror("Error: Message exceeds maximum length\n");
         return -1;
