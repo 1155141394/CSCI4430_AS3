@@ -60,7 +60,7 @@ int send_start(const char *hostname, int port) {
     PacketHeader *ack = (PacketHeader*)buf;
 //    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
     if(ack->type == 3 && head.seqNum == ack->seqNum) {
-        printf("Connection start!");
+        printf("Connection start!\n");
 
     }else{
         // (5) Close connection
@@ -84,29 +84,34 @@ int send_start(const char *hostname, int port) {
     int length = is.tellg();
     is.seekg(0, is.beg);
     int packets_num = length/packet_length+1;
+    printf("%d\n",packets_num);
     char packets[packets_num][1500];
 
     char *buffer = new char[packet_length];
 
     // read data as a block:
     int flag = 0;
-    while (is) {
+    while (true) {
         is.read(buffer, packet_length);
+        if(!is){
+            break;
+        }
         strcpy(packets[flag],buffer);
+//        printf("%s\n",packets[flag]);
         flag++;
     }
     buffer[is.gcount()] = '\0';
     strcpy(packets[flag],buffer);
-//        printf("Final packet only have %ld\n", is.gcount());
+//    printf("Final packet only have %ld\n", is.gcount());
     is.close();
-
+    printf("Begin send");
     int seqNum = 0;
     for(int i=0;i<WINDOWS;i++){
         PacketHeader header;
         header.seqNum = seqNum;
         header.type = 2;
         header.length = sizeof(packets[seqNum]);
-        char message[1500] = { 0 };
+        char message[1800] = { 0 };
         memcpy(message, &header, sizeof(header));
         strcat(message,packets[seqNum]);
         sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
