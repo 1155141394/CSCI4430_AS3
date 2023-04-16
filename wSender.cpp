@@ -56,7 +56,7 @@ int send_start(const char *hostname, int port) {
     buf[n] = '\0';
 
     PacketHeader *ack = (PacketHeader*)buf;
-    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum)
+    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
     if(ack->type == 3 && head.seqNum == ack->seqNum) {
         printf("Connection start!");
     }else{
