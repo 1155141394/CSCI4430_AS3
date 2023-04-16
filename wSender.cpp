@@ -120,10 +120,12 @@ int send_start(const char *hostname, int port) {
             header.seqNum = seqNum;
             header.type = 2;
             header.length = sizeof(packets[seqNum]);
-            char *message = (char*)malloc(sizeof(header));
+            char message[1472] = {0};
             memcpy(message, &header, sizeof(header));
 
-            strcat(message,packets[seqNum]);
+            for(int k = 16;k<1472;k++){
+                message[k] = packets[seqNum][k-16]
+            }
             printf("%s\n",message);
             sendto(sockfd, message, strlen(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
             break;
