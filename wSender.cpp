@@ -166,7 +166,7 @@ int send_start(const char *hostname, int port) {
             seq_list[flag] =  ack_head->seqNum;
             auto end   = system_clock::now();
             auto duration = duration_cast<microseconds>(end - start);
-            if(double(duration.count())>500){
+            if(double(duration.count())>1000){
                 break;
             }
         }
