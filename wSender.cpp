@@ -127,15 +127,14 @@ int send_start(const char *hostname, int port) {
                 message[k] = packets[seqNum][k-16];
             }
             printf("%s\n",message);
-            sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+            sendto(sockfd, message, sizeof(message), MSG_DONTWAIT, (const struct sockaddr *) &addr, sizeof(addr));
         }
 
-        break;
         int seq_list[WINDOWS];
-        fill_n(seq_list,WINDOWS,-1)
+        fill_n(seq_list,WINDOWS,-1);
         auto start = system_clock::now();
         int flag;
-        for(flag=0;i<WINDOWS;i++){
+        for(flag=0;flag<WINDOWS;flag++){
             socklen_t len = sizeof(addr);
             char packet_ack[1024] = { 0 };
             int n = recvfrom(sockfd, (char *)packet_ack, 1024,
@@ -149,6 +148,8 @@ int send_start(const char *hostname, int port) {
                 break;
             }
         }
+        printf("use time %f\n",double(duration.count()));
+        break;
         if(flag<WINDOWS-1){
 
         }else{
