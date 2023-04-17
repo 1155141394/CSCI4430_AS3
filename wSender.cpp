@@ -159,7 +159,7 @@ int send_start(const char *hostname, int port) {
             socklen_t len = sizeof(addr);
             char packet_ack[1024] = { 0 };
             int n = recvfrom(sockfd, (char *)packet_ack, 1024,
-                             MSG_DONTWAIT, ( struct sockaddr *) &addr, &len);
+                             MSG_NOSIGNAL, ( struct sockaddr *) &addr, &len);
             packet_ack[n] = '\0';
             PacketHeader *ack_head = (PacketHeader*)packet_ack;
             if(ack_head->seqNum<=seqNum){
