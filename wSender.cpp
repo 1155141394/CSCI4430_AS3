@@ -126,7 +126,7 @@ int send_start(const char *hostname, int port) {
             for(int k = 16;k<1472;k++){
                 message[k] = packets[seqNum][k-16];
             }
-            printf("%s\n",message);
+            printf("%s\n",packets[seqNum]);
             sendto(sockfd, message, sizeof(message), MSG_DONTWAIT, (const struct sockaddr *) &addr, sizeof(addr));
             seqNum ++;
         }
