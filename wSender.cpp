@@ -20,10 +20,9 @@ using namespace chrono;
 
 static const int MAX_MESSAGE_SIZE = 256;
 
-static const int WINDOWS = 3;
 
 
-int logger(char *filename,PacketHeader *head){
+int logger(const char *filename,PacketHeader *head){
     FILE *fp = NULL;
     fp = fopen(filename, "a");
     fprintf(fp,"%u %u %u %u\n",head->type,head->seqNum,head->length,head->checksum);
@@ -32,7 +31,7 @@ int logger(char *filename,PacketHeader *head){
 }
 
 
-int send_start(const char *hostname, int port) {
+int send_start(const char *hostname, int port,const char *input,const char *log,int size) {
 
     srand((unsigned)time(NULL));
     PacketHeader head;
@@ -41,7 +40,7 @@ int send_start(const char *hostname, int port) {
 //    printf("%d\n",head.seqNum);
     head.length = 0;
     int n;
-    // 首先需要定义一个变量
+
     char message[1024] = { 0 };
     memcpy(message, &head, sizeof(head));
     if (strlen(message) > MAX_MESSAGE_SIZE) {
@@ -69,7 +68,7 @@ int send_start(const char *hostname, int port) {
     // Call send() enough times to send all the data
     socklen_t sock_len;
     sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
-    logger((char*)"./log.txt",&head);
+    logger(log,&head);
 
     printf("Start request sent.\n");
     char buf[1024] = { 0 };
@@ -97,7 +96,7 @@ int send_start(const char *hostname, int port) {
 
     int packet_length = 1472 - sizeof(head);
 
-    std::ifstream is ("test.txt", std::ifstream::binary);
+    std::ifstream is (input, std::ifstream::binary);
 
     // get length of file:
     is.seekg(0, is.end);
@@ -129,7 +128,7 @@ int send_start(const char *hostname, int port) {
     int seqNum = 0;
     while(true){
         int sent_msg = 0;
-        for(int i=0;i<WINDOWS;i++){
+        for(int i=0;i<size;i++){
             if(seqNum >= packets_num){
                 break;
             }
@@ -146,7 +145,7 @@ int send_start(const char *hostname, int port) {
             }
             //printf("%s\n",packets[seqNum]);
             sendto(sockfd, message, sizeof(message), MSG_DONTWAIT, (const struct sockaddr *) &addr, sizeof(addr));
-            logger((char*)"./log.txt",&header);
+            logger(log,&header);
 
             seqNum ++;
             sent_msg++;
@@ -202,12 +201,32 @@ int send_start(const char *hostname, int port) {
 //        }
 //        printf("seqNUm %d\n", maxValue);
 //        seqNum = maxValue;
+//        printf("seq is %d\n",seqNum);
         if(seqNum >= packets_num){
             break;
         }
 
     }
+    head.type = 1;
+    char end[1024] = { 0 };
+    memcpy(end, &head, sizeof(head));
+    sendto(sockfd, end, sizeof(end), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+    logger(log,&head);
+    char end_ack[1024] = { 0 };
+    n = recvfrom(sockfd, (char *)end_ack, 1024,
+                 MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
+    end_ack[n] = '\0';
 
+    PacketHeader *ack_message = (PacketHeader*)end_ack;
+//    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
+    if(ack_message->type == 3 && head.seqNum == ack_message->seqNum) {
+        printf("Connection end!\n");
+
+    }else{
+        // (5) Close connection
+        printf("End failed.\n");
+    }
+    close(sockfd);
 
 
 
@@ -215,12 +234,13 @@ int send_start(const char *hostname, int port) {
 }
 
 int main(int argc, const char **argv){
-//    const char *hostname = argv[1];
-//    int port = atoi(argv[2]);
-//    int windows_size = atoi
-//    const char *message = argv[3];
+    const char *hostname = argv[1];
+    int port = atoi(argv[2]);
+    int size = atoi(argv[3]);
+    const char *input = argv[4];
+    const char *log = argv[5];
 
 //    send_start(hostname, port);
-    send_start("127.0.0.1",8080);
+    send_start(hostname,port, input,log, size);
     return 0;
 }
