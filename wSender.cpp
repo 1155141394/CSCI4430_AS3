@@ -130,6 +130,9 @@ int send_start(const char *hostname, int port) {
     while(true){
         int sent_msg = 0;
         for(int i=0;i<WINDOWS;i++){
+            if(seqNum >= packets_num){
+                break;
+            }
             PacketHeader header;
             header.seqNum = seqNum;
             header.type = 2;
