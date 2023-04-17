@@ -154,15 +154,20 @@ int send_start(const char *hostname, int port) {
 
         int seq_list[WINDOWS]  = {0};
         auto start = system_clock::now();
-        int flag;
-        for(flag=0;flag<sent_msg;flag++){
+        int flag = 0;
+        while(flag<sent_msg){
             socklen_t len = sizeof(addr);
             char packet_ack[1024] = { 0 };
             int n = recvfrom(sockfd, (char *)packet_ack, 1024,
                              MSG_DONTWAIT, ( struct sockaddr *) &addr, &len);
             packet_ack[n] = '\0';
             PacketHeader *ack_head = (PacketHeader*)packet_ack;
+            if(ack_head->seqNum<=seqNum){
+                continue;
+            }
+
             seq_list[flag] =  ack_head->seqNum;
+            flag ++;
             auto end   = system_clock::now();
             auto duration = duration_cast<microseconds>(end - start);
             if(double(duration.count())>500){
