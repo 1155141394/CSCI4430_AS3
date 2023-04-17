@@ -152,37 +152,53 @@ int send_start(const char *hostname, int port) {
             }
         }
 
-        int seq_list[WINDOWS]  = {0};
         auto start = system_clock::now();
-        int flag = 0;
-        while(flag<sent_msg){
-            socklen_t len = sizeof(addr);
-            char packet_ack[1024] = { 0 };
-            int n = recvfrom(sockfd, (char *)packet_ack, 1024,
-                             MSG_NOSIGNAL, ( struct sockaddr *) &addr, &len);
-            packet_ack[n] = '\0';
-            PacketHeader *ack_head = (PacketHeader*)packet_ack;
-            if(ack_head->seqNum<=seqNum-sent_msg){
-                continue;
-            }
-
-            seq_list[flag] =  ack_head->seqNum;
-            flag ++;
-            auto end   = system_clock::now();
-            auto duration = duration_cast<microseconds>(end - start);
-            if(double(duration.count())>500){
-                break;
-            }
+        socklen_t len = sizeof(addr);
+        char packet_ack[1024] = { 0 };
+        int n = recvfrom(sockfd, (char *)packet_ack, 1024,
+                         MSG_NOSIGNAL, ( struct sockaddr *) &addr, &len);
+        packet_ack[n] = '\0';
+        PacketHeader *ack_head = (PacketHeader*)packet_ack;
+        seqNum =  ack_head->seqNum;
+        auto end   = system_clock::now();
+        auto duration = duration_cast<microseconds>(end - start);
+        if(double(duration.count())>500){
+            seqNum -= sent_msg;
+            continue;
         }
 
 
-        int maxValue = *max_element(seq_list,seq_list+WINDOWS);
-        if(maxValue == 0){
-            maxValue = seqNum;
-
-        }
-        printf("seqNUm %d\n", maxValue);
-        seqNum = maxValue;
+//        int seq_list[WINDOWS]  = {0};
+//        auto start = system_clock::now();
+//        int flag = 0;
+//        while(flag<sent_msg){
+//            socklen_t len = sizeof(addr);
+//            char packet_ack[1024] = { 0 };
+//            int n = recvfrom(sockfd, (char *)packet_ack, 1024,
+//                             MSG_NOSIGNAL, ( struct sockaddr *) &addr, &len);
+//            packet_ack[n] = '\0';
+//            PacketHeader *ack_head = (PacketHeader*)packet_ack;
+//            if(ack_head->seqNum<=seqNum-sent_msg){
+//                continue;
+//            }
+//
+//            seq_list[flag] =  ack_head->seqNum;
+//            flag ++;
+//            auto end   = system_clock::now();
+//            auto duration = duration_cast<microseconds>(end - start);
+//            if(double(duration.count())>500){
+//                break;
+//            }
+//        }
+//
+//
+//        int maxValue = *max_element(seq_list,seq_list+WINDOWS);
+//        if(maxValue == 0){
+//            maxValue = seqNum;
+//
+//        }
+//        printf("seqNUm %d\n", maxValue);
+//        seqNum = maxValue;
         if(seqNum >= packets_num){
             break;
         }
@@ -195,7 +211,13 @@ int send_start(const char *hostname, int port) {
     return 0;
 }
 
-int main(){
-    send_start("127.0.0.1", 8080);
+int main(int argc, const char **argv){
+//    const char *hostname = argv[1];
+//    int port = atoi(argv[2]);
+//    int windows_size = atoi
+//    const char *message = argv[3];
+
+//    send_start(hostname, port);
+    send_start("127.0.0.1",8080);
     return 0;
 }
