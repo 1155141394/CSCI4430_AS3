@@ -22,7 +22,7 @@ static const int MAX_MESSAGE_SIZE = 256;
 
 
 
-int logger(char *filename,PacketHeader *head){
+int logger(const char *filename,PacketHeader *head){
     FILE *fp = NULL;
     fp = fopen(filename, "a");
     fprintf(fp,"<%u><%u><%u><%u>\n",head->type,head->seqNum,head->length,head->checksum);
@@ -236,7 +236,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
 int main(int argc, const char **argv){
     const char *hostname = argv[1];
     int port = atoi(argv[2]);
-    int windows_size = atoi(argv[3]);
+    int size = atoi(argv[3]);
     const char *input = argv[4];
     const char *log = argv[5];
 
