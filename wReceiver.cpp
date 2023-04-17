@@ -148,6 +148,7 @@ int run_server(int port, int queue_size, char * store_dir) {
 }
 
 int main(){
-    run_server(8080, 10, "./data.txt");
+    char store_dir[] = "./data.txt";
+    run_server(8080, 10, store_dir);
     return 0;
 }
