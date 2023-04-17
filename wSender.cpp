@@ -174,7 +174,7 @@ int send_start(const char *hostname, int port) {
 
         int maxValue = *max_element(seq_list,seq_list+WINDOWS);
         if(maxValue < 0){
-            maxValue = 0;
+            maxValue = seqNum;
         }
         seqNum = maxValue;
         if(seqNum >= packets_num){
