@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <cstdio>
 #include <fstream>
+#include <iostream>
 #include "crc32.h"
 #include "PacketHeader.h"
 
