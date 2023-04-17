@@ -22,6 +22,15 @@ static const int MAX_MESSAGE_SIZE = 256;
 
 static const int WINDOWS = 3;
 
+
+int logger(char *filename,PacketHeader *head){
+    FILE *fp = NULL;
+    fp = fopen("/tmp/test.txt", "a");
+    fprintf("<%u><%u><%u><%u>\n",head->type,head->seqNum,head->length,head->checksum);
+    fclose(fp);
+}
+
+
 int send_start(const char *hostname, int port) {
 
     srand((unsigned)time(NULL));
@@ -131,6 +140,7 @@ int send_start(const char *hostname, int port) {
             }
             //printf("%s\n",packets[seqNum]);
             sendto(sockfd, message, sizeof(message), MSG_DONTWAIT, (const struct sockaddr *) &addr, sizeof(addr));
+            logger("./log.txt",&header);
             seqNum ++;
             sent_msg++;
             if(seqNum >= packets_num){
