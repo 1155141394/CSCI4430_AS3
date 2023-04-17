@@ -41,7 +41,7 @@ int send_start(const char *hostname, int port) {
 //    printf("%d\n",head.seqNum);
     head.length = 0;
     int n;
-    // 首先需要定义一个变量
+
     char message[1024] = { 0 };
     memcpy(message, &head, sizeof(head));
     if (strlen(message) > MAX_MESSAGE_SIZE) {
@@ -207,7 +207,26 @@ int send_start(const char *hostname, int port) {
         }
 
     }
+    head.type = 1;
+    char end[1024] = { 0 };
+    memcpy(end, &head, sizeof(head));
+    sendto(sockfd, end, sizeof(end), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+    logger((char*)"./log.txt",&head);
+    char end_ack[1024] = { 0 };
+    n = recvfrom(sockfd, (char *)end_ack, 1024,
+                 MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
+    end_ack[n] = '\0';
 
+    PacketHeader *ack_message = (PacketHeader*)end_ack;
+//    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
+    if(ack_message->type == 3 && head.seqNum == ack_message->seqNum) {
+        printf("Connection end!\n");
+
+    }else{
+        // (5) Close connection
+        printf("End failed.\n");
+    }
+    close(sockfd);
 
 
 
