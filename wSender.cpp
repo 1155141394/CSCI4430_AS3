@@ -148,7 +148,7 @@ int send_start(const char *hostname, int port) {
                 break;
             }
         }
-        printf("use time %f\n",double(duration.count()));
+        printf("%d\n",flag);
         break;
         if(flag<WINDOWS-1){
 
