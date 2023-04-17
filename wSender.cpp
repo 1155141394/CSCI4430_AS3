@@ -141,7 +141,7 @@ int send_start(const char *hostname, int port) {
                              MSG_DONTWAIT, ( struct sockaddr *) &addr, &len);
             packet_ack[n] = '\0';
             PacketHeader *ack_head = (PacketHeader*)packet_ack;
-            seq_list[i] =  ack_head->seqNum;
+            seq_list[flag] =  ack_head->seqNum;
             auto end   = system_clock::now();
             auto duration = duration_cast<microseconds>(end - start);
             if(double(duration.count())>500){
