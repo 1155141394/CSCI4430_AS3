@@ -28,6 +28,7 @@ int logger(char *filename,PacketHeader *head){
     fp = fopen("/tmp/test.txt", "a");
     fputs("<%u><%u><%u><%u>\n",head->type,head->seqNum,head->length,head->checksum,fp);
     fclose(fp);
+    return 0;
 }
 
 
