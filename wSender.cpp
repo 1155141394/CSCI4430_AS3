@@ -26,7 +26,7 @@ static const int WINDOWS = 3;
 int logger(char *filename,PacketHeader *head){
     FILE *fp = NULL;
     fp = fopen("/tmp/test.txt", "a");
-    fputs("<%u><%u><%u><%u>\n",head->type,head->seqNum,head->length,head->checksum);
+    fputs("<%u><%u><%u><%u>\n",head->type,head->seqNum,head->length,head->checksum,fp);
     fclose(fp);
 }
 
