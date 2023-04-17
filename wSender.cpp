@@ -162,7 +162,7 @@ int send_start(const char *hostname, int port) {
                              MSG_NOSIGNAL, ( struct sockaddr *) &addr, &len);
             packet_ack[n] = '\0';
             PacketHeader *ack_head = (PacketHeader*)packet_ack;
-            if(ack_head->seqNum<=seqNum){
+            if(ack_head->seqNum<=seqNum-sent_msg){
                 continue;
             }
 
