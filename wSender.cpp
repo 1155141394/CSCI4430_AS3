@@ -12,6 +12,7 @@
 #include <time.h>
 #include <chrono>
 #include<algorithm>
+#include "crc32.h"
 #include "PacketHeader.h"
 
 using namespace std;
@@ -91,7 +92,7 @@ int send_start(const char *hostname, int port) {
     int length = is.tellg();
     is.seekg(0, is.beg);
     int packets_num = length/packet_length+1;
-    printf("%d\n",packets_num);
+    printf("packet_num is %d\n",packets_num);
     char packets[packets_num][1500];
 
     char *buffer = new char[packet_length];
@@ -111,7 +112,7 @@ int send_start(const char *hostname, int port) {
     strcpy(packets[flag],buffer);
 //    printf("Final packet only have %ld\n", is.gcount());
     is.close();
-    printf("Begin send\n");
+    printf("Begin sent.\n");
 
     int seqNum = 0;
     while(true){
@@ -121,6 +122,7 @@ int send_start(const char *hostname, int port) {
             header.seqNum = seqNum;
             header.type = 2;
             header.length = strlen(packets[seqNum]);
+            header.checksum = crc32(packets[seqNum],header.length);
             char message[1472] = {0};
             memcpy(message, &header, sizeof(header));
 
