@@ -226,7 +226,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir) {
             // receive data from sender
             memset(msg, 0, 1024);
             n = recvfrom(sockfd, (char *)msg, MAXSIZE,
-                         MSG_NOSIGNAL, ( struct sockaddr *) &cliaddr, &len);
+                         MSG_DONTWAIT, ( struct sockaddr *) &cliaddr, &len);
             msg[n] = '\0';
             printf("Received message lenght: %d\n", n);
             // Get out the header
