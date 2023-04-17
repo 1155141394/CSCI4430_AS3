@@ -86,7 +86,7 @@ int run_server(int port, int queue_size) {
     ack_header.length = 0;
     char data[2000] = {0};
     char recv_header_msg[100] = {0};
-    int seq_num = 0;
+    int seq_num = -1;
     while(1){
         printf("Start for loop.\n");
         // receive data from sender
