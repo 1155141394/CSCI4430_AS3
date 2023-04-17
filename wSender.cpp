@@ -155,12 +155,9 @@ int send_start(const char *hostname, int port) {
             }
         }
 
-        if(flag<sent_msg-1){
-            int maxValue = *max_element(seq_list,seq_list+WINDOWS);
-            seqNum = maxValue;
-        }else{
-            seqNum += WINDOWS;
-        }
+
+        int maxValue = *max_element(seq_list,seq_list+WINDOWS);
+        seqNum = maxValue;
         if(seqNum >= packets_num){
             break;
         }
