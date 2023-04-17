@@ -7,7 +7,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <cstdio>
-
+#include "crc32.h"
 #include "PacketHeader.h"
 
 #define MAXSIZE 1472
@@ -87,6 +87,7 @@ int run_server(int port, int queue_size) {
     char data[2000] = {0};
     char recv_header_msg[100] = {0};
     int seq_num = -1;
+    unsigned int checksum = 0;
     while(1){
         memset(data, 0, 2000);
         printf("Start for loop.\n");
@@ -114,6 +115,10 @@ int run_server(int port, int queue_size) {
                 data[i] = msg[header_len + i];
             }
             printf("Data: %s\n", data);
+            checksum = crc32(data, len);
+            if (checksum != recv_header -> checksum) {
+                continue;
+            }
             ack_header.seqNum = seq_num + 1;
             memcpy(ack, &ack_header, sizeof(*head));
             sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
