@@ -13,6 +13,8 @@
 
 #define MAXSIZE 1472
 
+using namespace std;
+
 int get_port_number(int sockfd) {
     struct sockaddr_in addr;
     socklen_t length = sizeof(addr);
@@ -125,10 +127,10 @@ int run_server(int port, int queue_size, char * store_dir) {
             sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
 
             // store the data in a txt file
-            std::ofstream stream;
+            ofstream stream;
             stream.open(store_dir, std::ios_base::app); // open file stream
             if( !stream )
-                std::cout << "Opening file failed" << endl;
+                cout << "Opening file failed" << endl;
             stream << testDest; // write char * into file stream
             if( !stream )
                 cout << "Write failed" << endl;
