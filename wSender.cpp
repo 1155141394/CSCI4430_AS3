@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <time.h>
 #include <chrono>
+#include<algorithm>
 #include "PacketHeader.h"
 
 using namespace std;
@@ -114,7 +115,7 @@ int send_start(const char *hostname, int port) {
 
     int seqNum = 0;
     while(true){
-
+        int sent_msg = 0;
         for(int i=0;i<WINDOWS;i++){
             PacketHeader header;
             header.seqNum = seqNum;
@@ -126,16 +127,20 @@ int send_start(const char *hostname, int port) {
             for(int k = 16;k<1472;k++){
                 message[k] = packets[seqNum][k-16];
             }
-            printf("%s\n",packets[seqNum]);
+            //printf("%s\n",packets[seqNum]);
             sendto(sockfd, message, sizeof(message), MSG_DONTWAIT, (const struct sockaddr *) &addr, sizeof(addr));
             seqNum ++;
+            sent_msg++;
+            if(seqNum >= packets_num){
+                break;
+            }
         }
 
         int seq_list[WINDOWS];
         fill_n(seq_list,WINDOWS,-1);
         auto start = system_clock::now();
         int flag;
-        for(flag=0;flag<WINDOWS;flag++){
+        for(flag=0;flag<sent_msg;flag++){
             socklen_t len = sizeof(addr);
             char packet_ack[1024] = { 0 };
             int n = recvfrom(sockfd, (char *)packet_ack, 1024,
@@ -149,12 +154,15 @@ int send_start(const char *hostname, int port) {
                 break;
             }
         }
-        printf("%d\n",flag);
-        break;
-        if(flag<WINDOWS-1){
 
+        if(flag<sent_msg-1){
+            int maxValue = *max_element(seq_list,seq_list+WINDOWS);
+            seqNum = maxValue;
         }else{
             seqNum += WINDOWS;
+        }
+        if(seqNum >= packets_num){
+            break;
         }
 
     }
