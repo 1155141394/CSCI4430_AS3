@@ -145,7 +145,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
             }
             //printf("%s\n",packets[seqNum]);
             sendto(sockfd, message, sizeof(message), MSG_DONTWAIT, (const struct sockaddr *) &addr, sizeof(addr));
-            logger((char*)"./log.txt",&header);
+            logger(log,&header);
 
             seqNum ++;
             sent_msg++;
@@ -211,7 +211,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
     char end[1024] = { 0 };
     memcpy(end, &head, sizeof(head));
     sendto(sockfd, end, sizeof(end), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
-    logger((char*)"./log.txt",&head);
+    logger(log,&head);
     char end_ack[1024] = { 0 };
     n = recvfrom(sockfd, (char *)end_ack, 1024,
                  MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
