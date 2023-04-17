@@ -88,6 +88,7 @@ int run_server(int port, int queue_size) {
     char recv_header_msg[100] = {0};
     int seq_num = -1;
     while(1){
+        memset(data, 0, 2000)
         printf("Start for loop.\n");
         // receive data from sender
         memset(msg, 0, 1024);
