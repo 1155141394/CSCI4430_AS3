@@ -26,7 +26,7 @@ static const int WINDOWS = 3;
 int logger(char *filename,PacketHeader *head){
     FILE *fp = NULL;
     fp = fopen("/tmp/test.txt", "a");
-    fputs("<%u><%u><%u><%u>\n",head->type,head->seqNum,head->length,head->checksum,fp);
+    fprintf(fp,"<%u><%u><%u><%u>\n",head->type,head->seqNum,head->length,head->checksum);
     fclose(fp);
     return 0;
 }
@@ -141,7 +141,7 @@ int send_start(const char *hostname, int port) {
             }
             //printf("%s\n",packets[seqNum]);
             sendto(sockfd, message, sizeof(message), MSG_DONTWAIT, (const struct sockaddr *) &addr, sizeof(addr));
-            logger("./log.txt",&header);
+            logger((char*)"./log.txt",&header);
             seqNum ++;
             sent_msg++;
             if(seqNum >= packets_num){
