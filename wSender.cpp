@@ -25,9 +25,10 @@ static const int WINDOWS = 3;
 
 int logger(char *filename,PacketHeader *head){
     FILE *fp = NULL;
-    fp = fopen("/tmp/test.txt", "a");
-    fprintf("<%u><%u><%u><%u>\n",head->type,head->seqNum,head->length,head->checksum);
+    fp = fopen(filename, "a");
+    fprintf(fp,"<%u><%u><%u><%u>\n",head->type,head->seqNum,head->length,head->checksum);
     fclose(fp);
+    return 0;
 }
 
 
@@ -68,6 +69,8 @@ int send_start(const char *hostname, int port) {
     // Call send() enough times to send all the data
     socklen_t sock_len;
     sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+    logger((char*)"./log.txt",&head);
+
     printf("Start request sent.\n");
     char buf[1024] = { 0 };
     n = recvfrom(sockfd, (char *)buf, 1024,
@@ -140,7 +143,8 @@ int send_start(const char *hostname, int port) {
             }
             //printf("%s\n",packets[seqNum]);
             sendto(sockfd, message, sizeof(message), MSG_DONTWAIT, (const struct sockaddr *) &addr, sizeof(addr));
-            logger("./log.txt",&header);
+            logger((char*)"./log.txt",&header);
+
             seqNum ++;
             sent_msg++;
             if(seqNum >= packets_num){
@@ -169,6 +173,9 @@ int send_start(const char *hostname, int port) {
 
 
         int maxValue = *max_element(seq_list,seq_list+WINDOWS);
+        if(maxValue < 0){
+            maxValue = 0;
+        }
         seqNum = maxValue;
         if(seqNum >= packets_num){
             break;
