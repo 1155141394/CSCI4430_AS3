@@ -202,6 +202,7 @@ int send_start(const char *hostname, int port) {
 //        }
 //        printf("seqNUm %d\n", maxValue);
 //        seqNum = maxValue;
+        printf(seqNum);
         if(seqNum >= packets_num){
             break;
         }
