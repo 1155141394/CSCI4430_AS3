@@ -112,8 +112,6 @@ int run_server(int port, int queue_size, char * store_dir) {
         printf("Current seq_num: %d, Received seq_num: %d\n", seq_num, recv_header->seqNum);
         if (recv_header->seqNum == seq_num + 1) {
             printf("Received package successfully.\n");
-            seq_num = recv_header->seqNum;
-
             // get out the data part
             for(int i = 0; i < len; i++){
                 data[i] = msg[header_len + i];
@@ -123,6 +121,7 @@ int run_server(int port, int queue_size, char * store_dir) {
             if (checksum != recv_header -> checksum) {
                 continue;
             }
+            seq_num = recv_header->seqNum;
             ack_header.seqNum = seq_num + 1;
             memcpy(ack, &ack_header, sizeof(*head));
             sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
