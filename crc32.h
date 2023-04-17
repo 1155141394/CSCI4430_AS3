@@ -1,32 +1,32 @@
-Skip to content
-        Search or jump to…
-Pull requests
-Issues
-        Codespaces
-Marketplace
-        Explore
-
-@1155141394
-henryhxu
-/
-CSCI4430-ESTR4120
-        Public
-Fork your own copy of henryhxu/CSCI4430-ESTR4120
-        Code
-Issues
-        Pull requests
-        Actions
-Projects
-        Security
-Insights
-        CSCI4430-ESTR4120/assignment/assignment-3/starter_files/crc32.h
-@REDIVIOUS
-        REDIVIOUS add assignment 3 materials
-        Latest commit e06d9f2 3 weeks ago
-History
-3 contributors
-@vtta@henryhxu@REDIVIOUS
-101 lines (95 sloc)  5.42 KB
+//Skip to content
+//        Search or jump to…
+//Pull requests
+//Issues
+//        Codespaces
+//Marketplace
+//        Explore
+//
+//@1155141394
+//henryhxu
+///
+//CSCI4430-ESTR4120
+//        Public
+//Fork your own copy of henryhxu/CSCI4430-ESTR4120
+//        Code
+//Issues
+//        Pull requests
+//        Actions
+//Projects
+//        Security
+//Insights
+//        CSCI4430-ESTR4120/assignment/assignment-3/starter_files/crc32.h
+//@REDIVIOUS
+//        REDIVIOUS add assignment 3 materials
+//        Latest commit e06d9f2 3 weeks ago
+//History
+//3 contributors
+//@vtta@henryhxu@REDIVIOUS
+//101 lines (95 sloc)  5.42 KB
 
 
 /*-
