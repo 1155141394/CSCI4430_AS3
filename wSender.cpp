@@ -128,6 +128,7 @@ int send_start(const char *hostname, int port) {
             }
             printf("%s\n",message);
             sendto(sockfd, message, sizeof(message), MSG_DONTWAIT, (const struct sockaddr *) &addr, sizeof(addr));
+            seqNum ++;
         }
 
         int seq_list[WINDOWS];
