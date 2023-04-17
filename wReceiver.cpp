@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <cstdio>
+#include <fstream>
 #include "crc32.h"
 #include "PacketHeader.h"
 
@@ -24,7 +25,7 @@ int get_port_number(int sockfd) {
 }
 
 
-int run_server(int port, int queue_size) {
+int run_server(int port, int queue_size, char * store_dir) {
 
     // (1) Create socket
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -114,7 +115,7 @@ int run_server(int port, int queue_size) {
             for(int i = 0; i < len; i++){
                 data[i] = msg[header_len + i];
             }
-            printf("Data: %s\n", data);
+//            printf("Data: %s\n", data);
             checksum = crc32(data, len);
             if (checksum != recv_header -> checksum) {
                 continue;
@@ -122,6 +123,16 @@ int run_server(int port, int queue_size) {
             ack_header.seqNum = seq_num + 1;
             memcpy(ack, &ack_header, sizeof(*head));
             sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
+
+            // store the data in a txt file
+            std::ofstream stream;
+            stream.open(store_dir, std::ios_base::app); // open file stream
+            if( !stream )
+                std::cout << "Opening file failed" << endl;
+            stream << testDest; // write char * into file stream
+            if( !stream )
+                cout << "Write failed" << endl;
+
         }
         else {
             printf("Not received package\n");
@@ -134,6 +145,6 @@ int run_server(int port, int queue_size) {
 }
 
 int main(){
-    run_server(8080, 10);
+    run_server(8080, 10, "./data.txt");
     return 0;
 }
