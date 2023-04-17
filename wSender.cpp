@@ -152,8 +152,8 @@ int send_start(const char *hostname, int port) {
             }
         }
 
-        int seq_list[WINDOWS];
-        fill_n(seq_list,WINDOWS,-1);
+        int seq_list[WINDOWS] = {0};
+
         auto start = system_clock::now();
         int flag;
         for(flag=0;flag<sent_msg;flag++){
