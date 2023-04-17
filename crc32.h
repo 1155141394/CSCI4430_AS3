@@ -130,18 +130,18 @@ uint32_t crc32(const void *buf, size_t size) {
 
     return crc ^ ~0U;
 }
-Footer
-© 2023 GitHub, Inc.
-Footer navigation
-Terms
-        Privacy
-Security
-        Status
-Docs
-        Contact GitHub
-        Pricing
-API
-        Training
-Blog
-        About
-CSCI4430-ESTR4120/crc32.h at 2023_spring · henryhxu/CSCI4430-ESTR4120
+//Footer
+//© 2023 GitHub, Inc.
+//Footer navigation
+//Terms
+//        Privacy
+//Security
+//        Status
+//Docs
+//        Contact GitHub
+//        Pricing
+//API
+//        Training
+//Blog
+//        About
+//CSCI4430-ESTR4120/crc32.h at 2023_spring · henryhxu/CSCI4430-ESTR4120
