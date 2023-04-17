@@ -152,8 +152,8 @@ int send_start(const char *hostname, int port) {
             }
         }
 
-        int seq_list[WINDOWS] = {0};
-
+        int seq_list[WINDOWS];
+        fill_n(seq_list,WINDOWS,-1);
         auto start = system_clock::now();
         int flag;
         for(flag=0;flag<sent_msg;flag++){
@@ -173,6 +173,9 @@ int send_start(const char *hostname, int port) {
 
 
         int maxValue = *max_element(seq_list,seq_list+WINDOWS);
+        if(maxValue < 0){
+            maxValue = 0;
+        }
         seqNum = maxValue;
         if(seqNum >= packets_num){
             break;
