@@ -19,7 +19,7 @@ using namespace std;
 int logger(char *filename,PacketHeader *head){
     FILE *fp = NULL;
     fp = fopen(filename, "a");
-    fprintf(fp,"<%u><%u><%u><%u>\n",head->type,head->seqNum,head->length,head->checksum);
+    fprintf(fp,"%u %u %u %u\n",head->type,head->seqNum,head->length,head->checksum);
     fclose(fp);
     return 0;
 }
@@ -154,7 +154,7 @@ int get_port_number(int sockfd) {
 //    return 0;
 //}
 
-int run_server(int port, int queue_size, int window_size, char * store_dir) {
+int run_server(int port, int queue_size, int window_size, char * store_dir, char * log_dir) {
 
     // (1) Create socket
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -279,6 +279,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir) {
             ack_header.seqNum = seq_num + 1;
             memcpy(ack, &ack_header, sizeof(*head));
             sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
+
         }
 
         // The connection is finished
@@ -296,8 +297,9 @@ int run_server(int port, int queue_size, int window_size, char * store_dir) {
 }
 
 int main(){
+    char log_dir[] = "./recv_log.txt"
     char store_dir[] = "./data.txt";
     int window_size = 3;
-    run_server(8080, 10, window_size, store_dir);
+    run_server(8080, 10, window_size, store_dir, log_dir);
     return 0;
 }
