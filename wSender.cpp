@@ -123,6 +123,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
         flag++;
     }
     int last_len = is.gcount();
+    printf("%d\n",last_len);
     buffer[last_len] = '\0';
     for(int i=0;i<is.gcount();i++){
         packets[flag][i] = buffer[i];
