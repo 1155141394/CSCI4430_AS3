@@ -16,7 +16,7 @@
 
 using namespace std;
 
-int logger(char *filename,PacketHeader *head){
+int logger(const char *filename,PacketHeader *head){
     FILE *fp = NULL;
     fp = fopen(filename, "a");
     fprintf(fp,"%u %u %u %u\n",head->type,head->seqNum,head->length,head->checksum);
