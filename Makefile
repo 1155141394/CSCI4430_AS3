@@ -13,18 +13,21 @@ CXX = g++
 # TODO For C++ only.
 CXXFLAGS = -g -std=c++11 -pedantic
 
+all: wSender
+all: wReceiver
+
 # TODO Modify source file name for your project.
 # For C only.
 RECEIVER = wReceiver.cpp
 SENDER = wSender.cpp
 # For C++ only.
 # SOURCES = iPerfer.cpp
-wSender wReceiver: $(SENDER) $(RECEIVER)
+wSender: $(SENDER) $(RECEIVER)
 	$(CXX) $(CXXFLAGS) $(SENDER) -o wSender
-	$(CXX) $(CXXFLAGS) $(RECEIVER) -o wReceiver
+	#$(CXX) $(CXXFLAGS) $(RECEIVER) -o wReceiver
 
-#wReceiver: $(RECEIVER)
-#	$(CXX) $(CXXFLAGS) $(RECEIVER) -o wReceiver
+wReceiver: $(RECEIVER)
+	$(CXX) $(CXXFLAGS) $(RECEIVER) -o wReceiver
 
 clean:
 	rm -rf wSender *.dSYM
