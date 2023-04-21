@@ -145,7 +145,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
                 message[k] = packets[seqNum][k-16];
             }
             //printf("%s\n",packets[seqNum]);
-            sendto(sockfd, message, sizeof(message), MSG_DONTWAIT, (const struct sockaddr *) &addr, sizeof(addr));
+            sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
             logger(log,&header);
 
             seqNum ++;
@@ -226,9 +226,6 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
         if(ack_message->type == 3 && head.seqNum == ack_message->seqNum) {
             printf("Connection end!\n");
             break;
-        }else{
-            // (5) Close connection
-            printf("End failed.\n");
         }
     }
     close(sockfd);
