@@ -293,6 +293,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
         // The connection is finished
         else if (end_seq != -1) {
             ack_header.seqNum = end_seq;
+            ack_header.length = 233;
             memcpy(ack, &ack_header, sizeof(*head));
             printf("end seq: %d\n", end_seq);
             sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
