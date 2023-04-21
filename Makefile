@@ -24,7 +24,6 @@ SENDER = wSender.cpp
 # SOURCES = iPerfer.cpp
 wSender: $(SENDER) $(RECEIVER)
 	$(CXX) $(CXXFLAGS) $(SENDER) -o wSender
-	#$(CXX) $(CXXFLAGS) $(RECEIVER) -o wReceiver
 
 wReceiver: $(RECEIVER)
 	$(CXX) $(CXXFLAGS) $(RECEIVER) -o wReceiver
