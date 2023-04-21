@@ -190,121 +190,126 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
     socklen_t len;
     int n;
     len = sizeof(cliaddr);
+    int count = 0;
+    while (1) {
 
-    // receive datagram from client
+        char store_file_dir[30] = {0};
+        sprintf_l(store_file_dir, "%s/FILE-%d.out", store_dir, count);
+        // receive datagram from client
 
-    char msg[1024] = { 0 };
-    n = recvfrom(sockfd, (char *)msg, 1024,
-                 MSG_WAITALL, ( struct sockaddr *) &cliaddr, &len);
-    msg[n] = '\0';
-    printf("Receive things back from sender.\n");
-//    printf("%s\n",msg);
-    PacketHeader *head = (PacketHeader*)msg;
-    logger(log_dir, head);
-    int header_len = sizeof(*head);
-    if(head->type == 0){
-        head->type = 3;
-//        printf("%d\n",head->seqNum);
-        // 首先需要定义一个变量
-        char ack[1024] = { 0 };
+        char msg[1024] = { 0 };
+        n = recvfrom(sockfd, (char *)msg, 1024,
+                     MSG_WAITALL, ( struct sockaddr *) &cliaddr, &len);
+        msg[n] = '\0';
+
+        PacketHeader *head = (PacketHeader*)msg;
         logger(log_dir, head);
-        memcpy(ack, head, sizeof(*head));
-        sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
-//        printf("ack back!\n");
-    }
+        int header_len = sizeof(*head);
+        if(head->type == 0){
+            head->type = 3;
+//        printf("%d\n",head->seqNum);
+            // 首先需要定义一个变量
+            char ack[1024] = { 0 };
+            logger(log_dir, head);
+            memcpy(ack, head, sizeof(*head));
+            sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
+//            printf("ack back!\n");
+        }
 
 //     Start receive data
-    PacketHeader ack_header;
-    char ack[1024] = { 0 };
-    ack_header.type = 3;
-    ack_header.length = 0;
-    char data[2000] = {0};
-    char recv_header_msg[100] = {0};
-    int seq_num = -1;
-    unsigned int checksum = 0;
-    unsigned int end_seq = -1;
-    while(1){
-        int count = 0;
-        for(int i = 0; i < window_size; i++){
-            memset(data, 0, 2000);
+        PacketHeader ack_header;
+        char ack[1024] = { 0 };
+        ack_header.type = 3;
+        ack_header.length = 0;
+        char data[2000] = {0};
+        char recv_header_msg[100] = {0};
+        int seq_num = -1;
+        unsigned int checksum = 0;
+        unsigned int end_seq = -1;
+        while(1){
+            int count = 0;
+            for(int i = 0; i < window_size; i++){
+                memset(data, 0, 2000);
 //            printf("Start for loop.\n");
-            // receive data from sender
-            memset(msg, 0, 1024);
-            n = recvfrom(sockfd, (char *)msg, MAXSIZE,
-                         MSG_DONTWAIT, ( struct sockaddr *) &cliaddr, &len);
-            if (n == -1) {
-                continue;
-            }
-            else {
-                count += 1;
-                msg[n] = '\0';
-//                printf("Received message lenght: %d\n", n);
-                // Get out the header
-//                printf("Header length: %d\n", header_len);
-                for(int i = 0; i < header_len; i++){
-                    recv_header_msg[i] = msg[i];
-                }
-                PacketHeader *recv_header = (PacketHeader*)recv_header_msg;
-                int len = recv_header->length;
-//                printf("Data length: %d\n", len);
-//                printf("Current seq_num: %d, Received seq_num: %d\n", seq_num, recv_header->seqNum);
-                logger(log_dir, recv_header);
-//                 check if the connection is end
-                if (recv_header->type == 1) {
-                    end_seq = recv_header -> seqNum;
-                    break;
-                }
-
-                if (recv_header->seqNum == seq_num + 1) {
-//                    printf("Received package successfully.\n");
-                    // get out the data part
-                    for(int i = 0; i < len; i++){
-                        data[i] = msg[header_len + i];
-                    }
-//            printf("Data: %s\n", data);
-                    checksum = crc32(data, len);
-                    if (checksum != recv_header -> checksum) {
-                        continue;
-                    }
-                    seq_num = recv_header->seqNum;
-
-                    // store the data in a txt file
-                    ofstream stream;
-                    stream.open(store_dir, std::ios_base::app); // open file stream
-                    if( !stream )
-                        cout << "Opening file failed" << endl;
-                    stream << data; // write char * into file stream
-                    if( !stream )
-                        cout << "Write failed" << endl;
-
-                }
-                else {
-//                    printf("Not received package\n");
+                // receive data from sender
+                memset(msg, 0, 1024);
+                n = recvfrom(sockfd, (char *)msg, MAXSIZE,
+                             MSG_DONTWAIT, ( struct sockaddr *) &cliaddr, &len);
+                if (n == -1) {
                     continue;
                 }
+                else {
+                    count += 1;
+                    msg[n] = '\0';
+//                    printf("Received message lenght: %d\n", n);
+                    // Get out the header
+//                    printf("Header length: %d\n", header_len);
+                    for(int i = 0; i < header_len; i++){
+                        recv_header_msg[i] = msg[i];
+                    }
+                    PacketHeader *recv_header = (PacketHeader*)recv_header_msg;
+                    int len = recv_header->length;
+//                    printf("Data length: %d\n", len);
+//                    printf("Current seq_num: %d, Received seq_num: %d\n", seq_num, recv_header->seqNum);
+                    logger(log_dir, recv_header);
+                    // check if the connection is end
+                    if (recv_header->type == 1) {
+                        end_seq = recv_header -> seqNum;
+                        break;
+                    }
+
+                    if (recv_header->seqNum == seq_num + 1) {
+                        // get out the data part
+                        for(int i = 0; i < len; i++){
+                            data[i] = msg[header_len + i];
+                        }
+//            printf("Data: %s\n", data);
+                        checksum = crc32(data, len);
+                        if (checksum != recv_header -> checksum) {
+                            continue;
+                        }
+                        seq_num = recv_header->seqNum;
+
+                        // store the data in a txt file
+                        ofstream stream;
+                        stream.open(store_file_dir, std::ios_base::app); // open file stream
+                        if( !stream )
+                            cout << "Opening file failed" << endl;
+                        stream << data; // write char * into file stream
+                        if( !stream )
+                            cout << "Write failed" << endl;
+
+                    }
+                    else {
+                        printf("Not received package\n");
+                        continue;
+                    }
+                }
+
             }
 
+            // The connection is not end and ask for new packages
+            if (end_seq == -1 and count > 0) {
+                ack_header.seqNum = seq_num + 1;
+                memcpy(ack, &ack_header, sizeof(*head));
+                sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
+                logger(log_dir, &ack_header);
+            }
+
+                // The connection is finished
+            else if (end_seq != -1) {
+                ack_header.seqNum = end_seq;
+                logger(log_dir, &ack_header);
+                memcpy(ack, &ack_header, sizeof(*head));
+                sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
+                break;
+            }
+
+
         }
-
-        // The connection is not end and ask for new packages
-        if (end_seq == -1 and count > 0) {
-            ack_header.seqNum = seq_num + 1;
-            memcpy(ack, &ack_header, sizeof(*head));
-            sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
-            logger(log_dir, &ack_header);
-        }
-
-        // The connection is finished
-        else if (end_seq != -1) {
-            ack_header.seqNum = end_seq;
-            logger(log_dir, &ack_header);
-            memcpy(ack, &ack_header, sizeof(*head));
-            sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
-            break;
-        }
-
-
+        count += 1;
     }
+
 
     return 0;
 }
@@ -314,7 +319,6 @@ int main(int argc, char** argv){
     int window_size = atoi(argv[2]);
     const char * log_dir = argv[4];
     char * store_dir = argv[3];
-    printf("%s\n",store_dir);
     char store_file_dir[30] = {0};
 
 //    if (mkdir(store_dir, 0777) == -1)
@@ -324,11 +328,11 @@ int main(int argc, char** argv){
 //        cout << "Directory created\n";
 
 
-//    for (int i = 0; i < strlen(store_dir); i++) {
-//        store_file_dir[i] = store_dir[i];
-//    }
+    for (int i = 0; i < strlen(store_dir); i++) {
+        store_file_dir[i] = store_dir[i];
+    }
 //    strcat(store_file_dir, "/FILE-i.out");
-//    printf("%s\n", store_file_dir);
-    run_server(listen_port, 10, window_size, store_dir, log_dir);
+    printf("%s\n", store_file_dir);
+    run_server(listen_port, 10, window_size, store_file_dir, log_dir);
     return 0;
 }

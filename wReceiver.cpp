@@ -194,7 +194,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
     while (1) {
 
         char store_file_dir[30] = {0};
-        sprintf_l(store_file_dir, "%s/FILE-%d.out", store_dir, count);
+        sprintf(store_file_dir, "%s/FILE-%d.out", store_dir, count);
         // receive datagram from client
 
         char msg[1024] = { 0 };
