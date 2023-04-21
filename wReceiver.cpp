@@ -244,7 +244,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
                 int len = recv_header->length;
                 printf("Data length: %d\n", len);
                 printf("Current seq_num: %d, Received seq_num: %d\n", seq_num, recv_header->seqNum);
-
+                logger(log_dir, recv_header);
                 // check if the connection is end
                 if (recv_header->type == 1) {
                     end_seq = recv_header -> seqNum;
@@ -287,15 +287,14 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
             ack_header.seqNum = seq_num + 1;
             memcpy(ack, &ack_header, sizeof(*head));
             sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
-
+            logger(log_dir, &ack_header);
         }
 
         // The connection is finished
         else if (end_seq != -1) {
             ack_header.seqNum = end_seq;
-            ack_header.length = 233;
+            logger(log_dir, &ack_header);
             memcpy(ack, &ack_header, sizeof(*head));
-            printf("end seq: %d\n", end_seq);
             sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
             break;
         }
