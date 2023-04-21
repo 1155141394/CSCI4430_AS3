@@ -78,7 +78,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
 
     PacketHeader *ack = (PacketHeader*)buf;
 //    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
-    printf("%d,%d\n",ack->type,ack->seqNum);
+
     if(ack->type == 3 && head.seqNum == ack->seqNum) {
         printf("Connection start!\n");
 
@@ -221,6 +221,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
 
     PacketHeader *ack_message = (PacketHeader*)end_ack;
 //    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
+    printf("%d,%d\n",ack->type,ack->seqNum);
     if(ack_message->type == 3 && head.seqNum == ack_message->seqNum) {
         printf("Connection end!\n");
 
