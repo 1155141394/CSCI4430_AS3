@@ -276,7 +276,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                         stream.open(store_file_dir, std::ios_base::app); // open file stream
                         if( !stream )
                             cout << "Opening file failed" << endl;
-                        printf("%ld, %d\n", strlen(data), seq_num);
+//                        printf("%ld, %d\n", strlen(data), seq_num);
                         stream.write(data, len); // write char * into file stream
                         if( !stream )
                             cout << "Write failed" << endl;
