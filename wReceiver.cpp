@@ -308,9 +308,11 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
 }
 
 int main(int argc, char** argv){
-    const char * log_dir = "./recv_log.txt";
-    char store_dir[] = "./data.txt";
-    int window_size = 3;
-    run_server(8080, 10, window_size, store_dir, log_dir);
+    int listen_port = atoi(argv[1]);
+    int window_size = atoi(argv[2]);
+    const char * log_dir = argv[4];
+    char * store_dir = argv[3];
+
+    run_server(listen_port, 10, window_size, store_dir, log_dir);
     return 0;
 }
