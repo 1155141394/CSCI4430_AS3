@@ -277,9 +277,10 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                         if( !stream )
                             cout << "Opening file failed" << endl;
                         printf("%ld, %d\n", strlen(data), seq_num);
-                        stream << data; // write char * into file stream
+                        stream.write(data, len); // write char * into file stream
                         if( !stream )
                             cout << "Write failed" << endl;
+                        stream.close();
 
                     }
                     else {
