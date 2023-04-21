@@ -311,9 +311,13 @@ int main(int argc, char** argv){
     int listen_port = atoi(argv[1]);
     int window_size = atoi(argv[2]);
     const char * log_dir = argv[4];
-    char store_dir[] = argv[3];
-
-    strcat(store_dir, "/FILE-i.out");
-    run_server(listen_port, 10, window_size, store_dir, log_dir);
+    char * store_dir = argv[3];
+    char store_file_dir[30] = {0};
+    for (int i = 0; i < strlen(store_dir); i++) {
+        store_file_dir[i] = store_dir[i];
+    }
+    strcat(store_file_dir, "/FILE-i.out");
+    printf("%s\n", store_file_dir);
+    run_server(listen_port, 10, window_size, store_file_dir, log_dir);
     return 0;
 }
