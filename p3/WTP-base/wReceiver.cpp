@@ -198,7 +198,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                  MSG_WAITALL, ( struct sockaddr *) &cliaddr, &len);
     msg[n] = '\0';
     printf("Receive things back from sender.\n");
-    printf("%s\n",msg);
+//    printf("%s\n",msg);
     PacketHeader *head = (PacketHeader*)msg;
     logger(log_dir, head);
     int header_len = sizeof(*head);
@@ -210,7 +210,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
         logger(log_dir, head);
         memcpy(ack, head, sizeof(*head));
         sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
-        printf("ack back!\n");
+//        printf("ack back!\n");
     }
 
 //     Start receive data
@@ -238,25 +238,25 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
             else {
                 count += 1;
                 msg[n] = '\0';
-                printf("Received message lenght: %d\n", n);
+//                printf("Received message lenght: %d\n", n);
                 // Get out the header
-                printf("Header length: %d\n", header_len);
+//                printf("Header length: %d\n", header_len);
                 for(int i = 0; i < header_len; i++){
                     recv_header_msg[i] = msg[i];
                 }
                 PacketHeader *recv_header = (PacketHeader*)recv_header_msg;
                 int len = recv_header->length;
-                printf("Data length: %d\n", len);
-                printf("Current seq_num: %d, Received seq_num: %d\n", seq_num, recv_header->seqNum);
+//                printf("Data length: %d\n", len);
+//                printf("Current seq_num: %d, Received seq_num: %d\n", seq_num, recv_header->seqNum);
                 logger(log_dir, recv_header);
-                // check if the connection is end
+//                 check if the connection is end
                 if (recv_header->type == 1) {
                     end_seq = recv_header -> seqNum;
                     break;
                 }
 
                 if (recv_header->seqNum == seq_num + 1) {
-                    printf("Received package successfully.\n");
+//                    printf("Received package successfully.\n");
                     // get out the data part
                     for(int i = 0; i < len; i++){
                         data[i] = msg[header_len + i];
@@ -279,7 +279,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
 
                 }
                 else {
-                    printf("Not received package\n");
+//                    printf("Not received package\n");
                     continue;
                 }
             }
@@ -314,20 +314,21 @@ int main(int argc, char** argv){
     int window_size = atoi(argv[2]);
     const char * log_dir = argv[4];
     char * store_dir = argv[3];
+    printf("%s\n",store_dir);
     char store_file_dir[30] = {0};
 
-    if (mkdir(store_dir, 0777) == -1)
-        cerr << "Error \n:  " << strerror(errno) << endl;
+//    if (mkdir(store_dir, 0777) == -1)
+//        cerr << "Error \n:  " << strerror(errno) << endl;
+//
+//    else
+//        cout << "Directory created\n";
 
-    else
-        cout << "Directory created\n";
 
-
-    for (int i = 0; i < strlen(store_dir); i++) {
-        store_file_dir[i] = store_dir[i];
-    }
-    strcat(store_file_dir, "/FILE-i.out");
-    printf("%s\n", store_file_dir);
-    run_server(listen_port, 10, window_size, store_file_dir, log_dir);
+//    for (int i = 0; i < strlen(store_dir); i++) {
+//        store_file_dir[i] = store_dir[i];
+//    }
+//    strcat(store_file_dir, "/FILE-i.out");
+//    printf("%s\n", store_file_dir);
+    run_server(listen_port, 10, window_size, store_dir, log_dir);
     return 0;
 }
