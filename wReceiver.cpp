@@ -219,6 +219,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
     int seq_num = -1;
     unsigned int checksum = 0;
     unsigned int end_seq = -1;
+    int count = 0;
     while(1){
         for(int i = 0; i < window_size; i++){
             memset(data, 0, 2000);
@@ -227,6 +228,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
             memset(msg, 0, 1024);
             n = recvfrom(sockfd, (char *)msg, MAXSIZE,
                          MSG_DONTWAIT, ( struct sockaddr *) &cliaddr, &len);
+            printf("%d\n", n);
             msg[n] = '\0';
             printf("Received message lenght: %d\n", n);
             // Get out the header
