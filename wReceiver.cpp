@@ -312,7 +312,7 @@ int main(int argc, char** argv){
     int window_size = atoi(argv[2]);
     const char * log_dir = argv[4];
     char * store_dir = argv[3];
-
+    strcat(store_dir, "/FILE-i.out");
     run_server(listen_port, 10, window_size, store_dir, log_dir);
     return 0;
 }
