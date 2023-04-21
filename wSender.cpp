@@ -103,7 +103,13 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
     is.seekg(0, is.end);
     int length = is.tellg();
     is.seekg(0, is.beg);
-    int packets_num = length/packet_length+1;
+    int packets_num = 0;
+    if(length%packet_length != 0){
+        packets_num = length/packet_length+1;
+    }else{
+        packets_num = length/packet_length;
+    }
+
     printf("packet_num is %d\n",packets_num);
     char packets[2000][1472];
 
