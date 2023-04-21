@@ -317,10 +317,10 @@ int main(int argc, char** argv){
     char store_file_dir[30] = {0};
 
     if (mkdir(store_dir, 0777) == -1)
-        cerr << "Error :  " << strerror(errno) << endl;
+        cerr << "Error \n:  " << strerror(errno) << endl;
 
     else
-        cout << "Directory created";
+        cout << "Directory created\n";
 
 
     for (int i = 0; i < strlen(store_dir); i++) {
