@@ -248,6 +248,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
                 // check if the connection is end
                 if (recv_header->type == 1) {
                     end_seq = recv_header -> seqNum;
+                    printf("end seq: %d\n", end_seq);
                     break;
                 }
 
