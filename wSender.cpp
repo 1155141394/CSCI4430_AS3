@@ -122,7 +122,8 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
 //        printf("%s\n",packets[flag]);
         flag++;
     }
-    buffer[is.gcount()] = '\0';
+    int last_len = is.gcount();
+    buffer[last_len] = '\0';
     for(int i=0;i<is.gcount();i++){
         packets[flag][i] = buffer[i];
     }
@@ -141,6 +142,9 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
             header.seqNum = seqNum;
             header.type = 2;
             header.length = 1456;
+            if(seqNum == packets_num-1){
+                head.length = last_len;
+            }
             header.checksum = crc32(packets[seqNum],header.length);
             char message[1472] = {0};
             memcpy(message, &header, sizeof(header));
