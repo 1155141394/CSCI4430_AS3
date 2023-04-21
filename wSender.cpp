@@ -144,7 +144,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
             header.type = 2;
             header.length = 1456;
             if(seqNum == packets_num-1){
-                head.length = last_len;
+                header.length = last_len;
             }
             header.checksum = crc32(packets[seqNum],header.length);
             char message[1472] = {0};
