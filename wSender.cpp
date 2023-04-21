@@ -105,7 +105,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
     is.seekg(0, is.beg);
     int packets_num = length/packet_length+1;
     printf("packet_num is %d\n",packets_num);
-    char packets[1000][1500];
+    char packets[2000][1472];
 
     char *buffer = new char[packet_length];
 
@@ -116,12 +116,16 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
         if(!is){
             break;
         }
-        strcpy(packets[flag],buffer);
+        for(int i=0;i<1456;i++){
+            packets[flag][i] = buffer[i];
+        }
 //        printf("%s\n",packets[flag]);
         flag++;
     }
     buffer[is.gcount()] = '\0';
-    strcpy(packets[flag],buffer);
+    for(int i=0;i<is.gcount();i++){
+        packets[flag][i] = buffer[i];
+    }
 //    printf("Final packet only have %ld\n", is.gcount());
     is.close();
     printf("Begin sent.\n");
