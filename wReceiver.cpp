@@ -263,6 +263,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                         for(int i = 0; i < len; i++){
                             data[i] = msg[header_len + i];
                         }
+                        data[len] = '\0';
 //            printf("Data: %s\n", data);
                         checksum = crc32(data, len);
                         if (checksum != recv_header -> checksum) {
@@ -275,7 +276,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                         stream.open(store_file_dir, std::ios_base::app); // open file stream
                         if( !stream )
                             cout << "Opening file failed" << endl;
-                        printf("%d, %d\n", len(data), seq_num);
+                        printf("%d, %d\n", sizeof(data), seq_num);
                         stream << data; // write char * into file stream
                         if( !stream )
                             cout << "Write failed" << endl;
