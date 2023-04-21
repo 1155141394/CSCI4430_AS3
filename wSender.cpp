@@ -105,7 +105,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
     is.seekg(0, is.beg);
     int packets_num = length/packet_length+1;
     printf("packet_num is %d\n",packets_num);
-    char packets[packets_num][1500];
+    char packets[1000][1500];
 
     char *buffer = new char[packet_length];
 
