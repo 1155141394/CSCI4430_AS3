@@ -23,10 +23,10 @@ SENDER = ./WTP-base/wSender.cpp
 # For C++ only.
 # SOURCES = iPerfer.cpp
 wSender: $(SENDER)
-	$(CXX) $(CXXFLAGS) $(SENDER) -o wSender
+	$(CXX) $(CXXFLAGS) $(SENDER) -o ./WTP-base/wSender
 
 wReceiver: $(RECEIVER)
-	$(CXX) $(CXXFLAGS) $(RECEIVER) -o wReceiver
+	$(CXX) $(CXXFLAGS) $(RECEIVER) -o ./WTP-base/wReceiver
 
 clean:
 	rm -rf wSender *.dSYM
