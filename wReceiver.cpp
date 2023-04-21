@@ -223,7 +223,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
         int count = 0;
         for(int i = 0; i < window_size; i++){
             memset(data, 0, 2000);
-            printf("Start for loop.\n");
+//            printf("Start for loop.\n");
             // receive data from sender
             memset(msg, 0, 1024);
             n = recvfrom(sockfd, (char *)msg, MAXSIZE,
