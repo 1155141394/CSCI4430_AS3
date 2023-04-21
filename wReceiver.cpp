@@ -248,7 +248,6 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
                 // check if the connection is end
                 if (recv_header->type == 1) {
                     end_seq = recv_header -> seqNum;
-                    printf("end seq: %d\n", end_seq);
                     break;
                 }
 
@@ -295,6 +294,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
         else if (end_seq != -1) {
             ack_header.seqNum = end_seq;
             memcpy(ack, &ack_header, sizeof(*head));
+            printf("end seq: %d\n", end_seq);
             sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
             break;
         }
