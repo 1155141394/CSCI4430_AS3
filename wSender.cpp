@@ -68,7 +68,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
     // Call send() enough times to send all the data
     socklen_t sock_len;
     sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
-    logger(log,&head);
+//    logger(log,&head);
 
     printf("Start request sent.\n");
     char buf[1024] = { 0 };
