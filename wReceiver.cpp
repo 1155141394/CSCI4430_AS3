@@ -16,7 +16,7 @@
 
 using namespace std;
 
-int logger(char *filename,PacketHeader *head){
+int logger(const char *filename,PacketHeader *head){
     FILE *fp = NULL;
     fp = fopen(filename, "a");
     fprintf(fp,"%u %u %u %u\n",head->type,head->seqNum,head->length,head->checksum);
@@ -154,7 +154,7 @@ int get_port_number(int sockfd) {
 //    return 0;
 //}
 
-int run_server(int port, int queue_size, int window_size, char * store_dir, char * log_dir) {
+int run_server(int port, int queue_size, int window_size, char * store_dir, const char * log_dir) {
 
     // (1) Create socket
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -244,7 +244,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
                 int len = recv_header->length;
                 printf("Data length: %d\n", len);
                 printf("Current seq_num: %d, Received seq_num: %d\n", seq_num, recv_header->seqNum);
-
+                logger(log_dir, recv_header);
                 // check if the connection is end
                 if (recv_header->type == 1) {
                     end_seq = recv_header -> seqNum;
@@ -287,15 +287,14 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
             ack_header.seqNum = seq_num + 1;
             memcpy(ack, &ack_header, sizeof(*head));
             sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
-
+            logger(log_dir, &ack_header);
         }
 
         // The connection is finished
         else if (end_seq != -1) {
             ack_header.seqNum = end_seq;
-            ack_header.length = 233;
+            logger(log_dir, &ack_header);
             memcpy(ack, &ack_header, sizeof(*head));
-            printf("end seq: %d\n", end_seq);
             sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
             break;
         }
@@ -307,7 +306,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
 }
 
 int main(){
-    char log_dir[] = "./recv_log.txt";
+    const char * log_dir = "./recv_log.txt";
     char store_dir[] = "./data.txt";
     int window_size = 3;
     run_server(8080, 10, window_size, store_dir, log_dir);
