@@ -306,7 +306,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
 }
 
 int main(){
-    char log_dir[] = "./recv_log.txt";
+    const char * log_dir = "./recv_log.txt";
     char store_dir[] = "./data.txt";
     int window_size = 3;
     run_server(8080, 10, window_size, store_dir, log_dir);
