@@ -154,7 +154,7 @@ int get_port_number(int sockfd) {
 //    return 0;
 //}
 
-int run_server(int port, int queue_size, int window_size, char * store_dir, char * log_dir) {
+int run_server(int port, int queue_size, int window_size, char * store_dir, const char * log_dir) {
 
     // (1) Create socket
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
