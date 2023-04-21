@@ -197,7 +197,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
         sprintf(store_file_dir, "%s/FILE-%d.out", store_dir, count);
         // receive datagram from client
 
-        char msg[1024] = { 0 };
+        char msg[1500] = { 0 };
         n = recvfrom(sockfd, (char *)msg, 1024,
                      MSG_WAITALL, ( struct sockaddr *) &cliaddr, &len);
         msg[n] = '\0';
@@ -232,7 +232,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                 memset(data, 0, 2000);
 //            printf("Start for loop.\n");
                 // receive data from sender
-                memset(msg, 0, 1024);
+                memset(msg, 0, 1500);
                 n = recvfrom(sockfd, (char *)msg, MAXSIZE,
                              MSG_DONTWAIT, ( struct sockaddr *) &cliaddr, &len);
                 if (n == -1) {
