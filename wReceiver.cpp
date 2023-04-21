@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <direct.h>
 #include "crc32.h"
 #include "PacketHeader.h"
 
@@ -313,6 +314,15 @@ int main(int argc, char** argv){
     const char * log_dir = argv[4];
     char * store_dir = argv[3];
     char store_file_dir[30] = {0};
+
+    if (0 != access(store_dir, 0))
+    {
+        // if this folder not exist, create a new one.
+        mkdir(store_dir);   // 返回 0 表示创建成功，-1 表示失败
+        //换成 ::_mkdir  ::_access 也行，不知道什么意思
+    }
+
+
     for (int i = 0; i < strlen(store_dir); i++) {
         store_file_dir[i] = store_dir[i];
     }
