@@ -219,8 +219,8 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
     int seq_num = -1;
     unsigned int checksum = 0;
     unsigned int end_seq = -1;
-    int count = 0;
     while(1){
+        int count = 0;
         for(int i = 0; i < window_size; i++){
             memset(data, 0, 2000);
             printf("Start for loop.\n");
@@ -228,52 +228,58 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
             memset(msg, 0, 1024);
             n = recvfrom(sockfd, (char *)msg, MAXSIZE,
                          MSG_DONTWAIT, ( struct sockaddr *) &cliaddr, &len);
-            printf("%d\n", n);
-            msg[n] = '\0';
-            printf("Received message lenght: %d\n", n);
-            // Get out the header
-            printf("Header length: %d\n", header_len);
-            for(int i = 0; i < header_len; i++){
-                recv_header_msg[i] = msg[i];
-            }
-            PacketHeader *recv_header = (PacketHeader*)recv_header_msg;
-            int len = recv_header->length;
-            printf("Data length: %d\n", len);
-            printf("Current seq_num: %d, Received seq_num: %d\n", seq_num, recv_header->seqNum);
-
-            // check if the connection is end
-            if (recv_header->type == 1) {
-                end_seq = recv_header -> seqNum;
-                break;
-            }
-
-            if (recv_header->seqNum == seq_num + 1) {
-                printf("Received package successfully.\n");
-                // get out the data part
-                for(int i = 0; i < len; i++){
-                    data[i] = msg[header_len + i];
-                }
-//            printf("Data: %s\n", data);
-                checksum = crc32(data, len);
-                if (checksum != recv_header -> checksum) {
-                    continue;
-                }
-                seq_num = recv_header->seqNum;
-
-                // store the data in a txt file
-                ofstream stream;
-                stream.open(store_dir, std::ios_base::app); // open file stream
-                if( !stream )
-                    cout << "Opening file failed" << endl;
-                stream << data; // write char * into file stream
-                if( !stream )
-                    cout << "Write failed" << endl;
-
-            }
-            else {
-                printf("Not received package\n");
+            if (n == -1) {
                 continue;
             }
+            else {
+                count += 1;
+                msg[n] = '\0';
+                printf("Received message lenght: %d\n", n);
+                // Get out the header
+                printf("Header length: %d\n", header_len);
+                for(int i = 0; i < header_len; i++){
+                    recv_header_msg[i] = msg[i];
+                }
+                PacketHeader *recv_header = (PacketHeader*)recv_header_msg;
+                int len = recv_header->length;
+                printf("Data length: %d\n", len);
+                printf("Current seq_num: %d, Received seq_num: %d\n", seq_num, recv_header->seqNum);
+
+                // check if the connection is end
+                if (recv_header->type == 1) {
+                    end_seq = recv_header -> seqNum;
+                    break;
+                }
+
+                if (recv_header->seqNum == seq_num + 1) {
+                    printf("Received package successfully.\n");
+                    // get out the data part
+                    for(int i = 0; i < len; i++){
+                        data[i] = msg[header_len + i];
+                    }
+//            printf("Data: %s\n", data);
+                    checksum = crc32(data, len);
+                    if (checksum != recv_header -> checksum) {
+                        continue;
+                    }
+                    seq_num = recv_header->seqNum;
+
+                    // store the data in a txt file
+                    ofstream stream;
+                    stream.open(store_dir, std::ios_base::app); // open file stream
+                    if( !stream )
+                        cout << "Opening file failed" << endl;
+                    stream << data; // write char * into file stream
+                    if( !stream )
+                        cout << "Write failed" << endl;
+
+                }
+                else {
+                    printf("Not received package\n");
+                    continue;
+                }
+            }
+
         }
 
         // The connection is not end and ask for new packages
@@ -285,7 +291,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, char
         }
 
         // The connection is finished
-        else {
+        else if (count > 0){
             ack_header.seqNum = end_seq;
             memcpy(ack, &ack_header, sizeof(*head));
             sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
