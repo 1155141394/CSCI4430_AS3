@@ -281,7 +281,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
 
                     }
                     else {
-                        printf("Not received package\n");
+//                        printf("Not received package\n");
                         continue;
                     }
                 }
