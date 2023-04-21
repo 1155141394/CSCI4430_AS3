@@ -214,20 +214,22 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
     memcpy(end, &head, sizeof(head));
     sendto(sockfd, end, sizeof(end), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
     logger(log,&head);
-    char end_ack[1024] = { 0 };
-    n = recvfrom(sockfd, (char *)end_ack, 1024,
-                 MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
-    end_ack[n] = '\0';
+    while(true){
+        char end_ack[1024] = { 0 };
+        n = recvfrom(sockfd, (char *)end_ack, 1024,
+                     MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
+        end_ack[n] = '\0';
 
-    PacketHeader *ack_message = (PacketHeader*)end_ack;
+        PacketHeader *ack_message = (PacketHeader*)end_ack;
 //    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
-    printf("%d,%d,%d\n",ack_message->type,ack_message->seqNum,ack_message->length);
-    if(ack_message->type == 3 && head.seqNum == ack_message->seqNum) {
-        printf("Connection end!\n");
-
-    }else{
-        // (5) Close connection
-        printf("End failed.\n");
+        printf("%d,%d,%d\n",ack_message->type,ack_message->seqNum,ack_message->length);
+        if(ack_message->type == 3 && head.seqNum == ack_message->seqNum) {
+            printf("Connection end!\n");
+            break;
+        }else{
+            // (5) Close connection
+            printf("End failed.\n");
+        }
     }
     close(sockfd);
 
