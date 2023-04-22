@@ -27,16 +27,16 @@ SENDER-OPT = ./WTP-opt/wSender.cpp
 # For C++ only.
 # SOURCES = iPerfer.cpp
 wSender-base: $(SENDER-BASE)
-	$(CXX) $(CXXFLAGS) $(SENDER) -o ./WTP-base/wSender
+	$(CXX) $(CXXFLAGS) $(SENDER-BASE) -o ./WTP-base/wSender
 
 wReceiver-base: $(RECEIVER-BASE)
-	$(CXX) $(CXXFLAGS) $(RECEIVER) -o ./WTP-base/wReceiver
-
-wSender-opt: $(RECEIVER-OPT)
-	$(CXX) $(CXXFLAGS) $(SENDER) -o ./WTP-opt/wSender
+	$(CXX) $(CXXFLAGS) $(RECEIVER-BASE) -o ./WTP-base/wReceiver
 
 wSender-opt: $(SENDER-OPT)
-	$(CXX) $(CXXFLAGS) $(SENDER) -o ./WTP-opt/wSender
+	$(CXX) $(CXXFLAGS) $(SENDER-OPT) -o ./WTP-opt/wSender
+
+wReceiver-opt: $(RECEIVER-OPT)
+	$(CXX) $(CXXFLAGS) $(RECEIVER-OPT) -o ./WTP-opt/wReceiver
 
 clean:
 	rm -rf wSender *.dSYM
