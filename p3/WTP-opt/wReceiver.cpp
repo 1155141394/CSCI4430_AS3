@@ -134,7 +134,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
 //                    printf("Current seq_num: %d, Received seq_num: %d\n", seq_num, recv_header->seqNum);
                 logger(log_dir, recv_header);
                 // check if the connection is end
-                printf("%d, %d\n", recv_header->seqNum, recv_header->type);
+                printf("%d, %d, %d, %d\n", recv_header->seqNum, recv_header->type, seq_num, seq_num+window_size);
                 if (recv_header->type == 1) {
                     end_seq = recv_header -> seqNum;
                     ack_header.seqNum = end_seq;
