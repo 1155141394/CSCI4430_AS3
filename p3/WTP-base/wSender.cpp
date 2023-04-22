@@ -67,13 +67,13 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
     // (4) Send message to remote server
     // Call send() enough times to send all the data
     socklen_t sock_len;
-    sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+    sendto(sockfd, message, sizeof(message), MSG_DONTWAIT, (const struct sockaddr *) &addr, sizeof(addr));
     logger(log,&head);
 
     printf("Start request sent.\n");
     char buf[1024] = { 0 };
     n = recvfrom(sockfd, (char *)buf, 1024,
-                 MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
+             MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
     buf[n] = '\0';
 
     PacketHeader *ack = (PacketHeader*)buf;
@@ -103,13 +103,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
     is.seekg(0, is.end);
     int length = is.tellg();
     is.seekg(0, is.beg);
-    int packets_num = 0;
-    if(length%packet_length != 0){
-        packets_num = length/packet_length+1;
-    }else{
-        packets_num = length/packet_length;
-    }
-
+    int packets_num = length/packet_length+1;
     printf("packet_num is %d\n",packets_num);
     char packets[2000][1472];
 
@@ -172,25 +166,18 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
 
         auto start = system_clock::now();
         socklen_t len = sizeof(addr);
-        while(true){
-            char packet_ack[1024] = { 0 };
-            int n = recvfrom(sockfd, (char *)packet_ack, 1024,
-                             MSG_DONTWAIT, ( struct sockaddr *) &addr, &len);
-
-            auto end   = system_clock::now();
-            auto duration = duration_cast<milliseconds>(end - start);
-            if(double(duration.count())>500){
-                seqNum -= sent_msg;
-                break;
-            }
-            if(n == -1){
-                continue;
-            }else{
-                packet_ack[n] = '\0';
-                PacketHeader *ack_head = (PacketHeader*)packet_ack;
-                seqNum =  ack_head->seqNum;
-                logger(log,ack_head);
-            }
+        char packet_ack[1024] = { 0 };
+        int n = recvfrom(sockfd, (char *)packet_ack, 1024,
+                         MSG_NOSIGNAL, ( struct sockaddr *) &addr, &len);
+        packet_ack[n] = '\0';
+        PacketHeader *ack_head = (PacketHeader*)packet_ack;
+        seqNum =  ack_head->seqNum;
+        logger(log,ack_head);
+        auto end   = system_clock::now();
+        auto duration = duration_cast<milliseconds>(end - start);
+        if(double(duration.count())>500){
+            seqNum -= sent_msg;
+            continue;
         }
 
 
