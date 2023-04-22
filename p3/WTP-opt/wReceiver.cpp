@@ -134,7 +134,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
 //                    printf("Current seq_num: %d, Received seq_num: %d\n", seq_num, recv_header->seqNum);
                 logger(log_dir, recv_header);
                 // check if the connection is end
-
+                printf("%d, %d\n", recv_header->seqNum, recv_header->type);
                 if (recv_header->type == 1) {
                     end_seq = recv_header -> seqNum;
                     ack_header.seqNum = end_seq;
@@ -145,7 +145,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                 }
 
                 else if (recv_header->type == 2 && recv_header->seqNum > seq_num && recv_header->seqNum <= seq_num + window_size) {
-                    printf("%d\n", recv_header->seqNum);
+
                     for(int i = 0; i < len; i++){
                         data[recv_header->seqNum][i] = msg[header_len + i];
                     }
