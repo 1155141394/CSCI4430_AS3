@@ -134,6 +134,13 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
 
     int seqNum = 0;
     while(true){
+        if(seqNum>=packets_num){
+            break;
+        }
+        int need_ack[size]  = {0};
+        for(int k=0;k<size;k++){
+            need_ack[i] = -1;
+        }
         int sent_msg = 0;
         for(int i=0;i<size;i++){
             if(seqNum >= packets_num){
@@ -156,65 +163,93 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
             //printf("%s\n",packets[seqNum]);
             sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
             logger(log,&header);
-
+            need_ack[i] = seqNum;
             seqNum ++;
             sent_msg++;
             if(seqNum >= packets_num){
                 break;
             }
         }
-
-        auto start = system_clock::now();
-        socklen_t len = sizeof(addr);
-        char packet_ack[1024] = { 0 };
-        int n = recvfrom(sockfd, (char *)packet_ack, 1024,
-                         MSG_NOSIGNAL, ( struct sockaddr *) &addr, &len);
-        packet_ack[n] = '\0';
-        PacketHeader *ack_head = (PacketHeader*)packet_ack;
-        seqNum =  ack_head->seqNum;
-        logger(log,ack_head);
-        auto end   = system_clock::now();
-        auto duration = duration_cast<milliseconds>(end - start);
-        if(double(duration.count())>500){
-            seqNum -= sent_msg;
-            continue;
-        }
-
-
-//        int seq_list[WINDOWS]  = {0};
+//
 //        auto start = system_clock::now();
-//        int flag = 0;
-//        while(flag<sent_msg){
-//            socklen_t len = sizeof(addr);
-//            char packet_ack[1024] = { 0 };
-//            int n = recvfrom(sockfd, (char *)packet_ack, 1024,
-//                             MSG_NOSIGNAL, ( struct sockaddr *) &addr, &len);
-//            packet_ack[n] = '\0';
-//            PacketHeader *ack_head = (PacketHeader*)packet_ack;
-//            if(ack_head->seqNum<=seqNum-sent_msg){
-//                continue;
-//            }
-//
-//            seq_list[flag] =  ack_head->seqNum;
-//            flag ++;
-//            auto end   = system_clock::now();
-//            auto duration = duration_cast<microseconds>(end - start);
-//            if(double(duration.count())>500){
-//                break;
-//            }
+//        socklen_t len = sizeof(addr);
+//        char packet_ack[1024] = { 0 };
+//        int n = recvfrom(sockfd, (char *)packet_ack, 1024,
+//                         MSG_NOSIGNAL, ( struct sockaddr *) &addr, &len);
+//        packet_ack[n] = '\0';
+//        PacketHeader *ack_head = (PacketHeader*)packet_ack;
+//        seqNum =  ack_head->seqNum;
+//        logger(log,ack_head);
+//        auto end   = system_clock::now();
+//        auto duration = duration_cast<milliseconds>(end - start);
+//        if(double(duration.count())>500){
+//            seqNum -= sent_msg;
+//            continue;
 //        }
-//
-//
-//        int maxValue = *max_element(seq_list,seq_list+WINDOWS);
-//        if(maxValue == 0){
-//            maxValue = seqNum;
-//
-//        }
-//        printf("seqNUm %d\n", maxValue);
-//        seqNum = maxValue;
-//        printf("seq is %d\n",seqNum);
-        if(seqNum >= packets_num){
-            break;
+
+        while(true){
+            auto start = system_clock::now();
+            while(true){
+                auto end   = system_clock::now();
+                auto duration = duration_cast<milliseconds>(end - start);
+                if(double(duration.count())>500){
+                    break;
+                }
+
+                socklen_t len = sizeof(addr);
+                char packet_ack[1024] = { 0 };
+                int n = recvfrom(sockfd, (char *)packet_ack, 1024,
+                                 MSG_DONTWAIT, ( struct sockaddr *) &addr, &len);
+                if(n < 0){
+                    continue;
+                }
+                packet_ack[n] = '\0';
+                PacketHeader *ack_head = (PacketHeader*)packet_ack;
+                if(ack_head->seqNum<seqNum-sent_msg || ack_head->seqNum>=seqNum){
+                    continue;
+                }
+
+                for(int k = 0;k<size;k++){
+                    if(need_ack[k] == ack_head->seqNum){
+                        logger(log,ack_head)
+                        need_ack[k] = -1;
+                        break;
+                    }
+                }
+            }
+//            判断ack是否齐全
+            int finish = 1;
+            for(int j =0;j<size;j++){
+                if(need_ack[j] != -1){
+                    finish = 0;
+                }
+            }
+            if(finish){
+                break;
+            }else{
+//                如果不齐，则重新传need_ack中的seqNum
+                for(int p=0;p<size;p++){
+                    if(need_ack[p]!=-1){
+                        PacketHeader resend;
+                        resend.seqNum = need_ack[p];
+                        resend.type = 2;
+                        resend.length = 1456;
+                        if(need_ack[p] == packets_num-1){
+                            resend.length = last_len;
+                        }
+                        resend.checksum = crc32(packets[need_ack[p]],resend.length);
+                        char re_message[1472] = {0};
+                        memcpy(re_message, &resend, sizeof(resend));
+
+                        for(int k = 16;k<1472;k++){
+                            re_message[k] = packets[need_ack[p]][k-16];
+                        }
+                        //printf("%s\n",packets[seqNum]);
+                        sendto(sockfd, re_message, sizeof(re_message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+                        logger(log,&resend);
+                    }
+                }
+            }
         }
 
     }
