@@ -139,7 +139,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
         }
         int need_ack[size]  = {0};
         for(int k=0;k<size;k++){
-            need_ack[i] = -1;
+            need_ack[k] = -1;
         }
         int sent_msg = 0;
         for(int i=0;i<size;i++){
@@ -211,7 +211,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
 
                 for(int k = 0;k<size;k++){
                     if(need_ack[k] == ack_head->seqNum){
-                        logger(log,ack_head)
+                        logger(log,ack_head);
                         need_ack[k] = -1;
                         break;
                     }
