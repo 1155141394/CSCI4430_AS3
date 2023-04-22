@@ -12,8 +12,8 @@
 #include <time.h>
 #include <chrono>
 #include<algorithm>
-#include "crc32.h"
-#include "PacketHeader.h"
+#include "../starter_files/crc32.h"
+#include "../starter_files/PacketHeader.h"
 
 using namespace std;
 using namespace chrono;
