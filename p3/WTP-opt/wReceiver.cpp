@@ -11,7 +11,7 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include "crc32.h"
+#include "../crc32.h"
 #include "PacketHeader.h"
 
 #define MAXSIZE 1472
