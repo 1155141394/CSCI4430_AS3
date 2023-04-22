@@ -31,8 +31,8 @@ int logger(const char *filename,PacketHeader *head){
 }
 
 
-int send_start(const char *hostname, int port,const char *input,const char *log,int size) {
-
+int send_start(const char *hostname, int port,const char *input,const char *log,int win_size) {
+    static const int size = win_size;
     srand((unsigned)time(NULL));
     PacketHeader head;
     head.type = 0;
