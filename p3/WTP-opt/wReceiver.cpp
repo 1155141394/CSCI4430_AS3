@@ -144,7 +144,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                     break;
                 }
 
-                else if ((recv_header->type == 2) and (recv_header->seqNum > seq_num)){ //and (recv_header->seqNum <= (seq_num + window_size))) {
+                else if ((recv_header->type == 2) and (int(recv_header->seqNum) > seq_num) and (int(recv_header->seqNum) <= (seq_num + window_size))) {
                     printf("%d, %d, %d, %d\n", recv_header->seqNum, recv_header->type, seq_num, seq_num+window_size);
                     for(int i = 0; i < len; i++){
                         data[recv_header->seqNum][i] = msg[header_len + i];
