@@ -192,12 +192,8 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
         if( !stream )
             cout << "Write failed" << endl;
         stream.close();
-
-    }
         count += 1;
-}
-
-
+    }
     return 0;
 }
 
