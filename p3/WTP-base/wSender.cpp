@@ -1,231 +1,270 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
+#include <arpa/inet.h>		// ntohs()
+#include <stdio.h>		// printf(), perror()
+#include <stdlib.h>		// atoi()
+#include <string.h>		// strlen()
+#include <sys/socket.h>		// socket(), connect(), send(), recv()
+#include <unistd.h>		// close()
 #include <netdb.h>
+#include <netinet/in.h>
+#include <iostream>     // std::cout
+#include <fstream>      // std::ifstream
+#include <cstdio>
+#include <time.h>
+#include <chrono>
+#include<algorithm>
 #include "crc32.h"
 #include "PacketHeader.h"
-#include <iostream>
-#include <fstream>
-#include <random>
-#include <deque>
-#include "utilities.h"
+
 using namespace std;
+using namespace chrono;
 
-#define MAX_WTP_SIZE 1472
-#define HEADER_LEN 16
-#define START 0
-#define FIN 1
-#define DATA 2
+static const int MAX_MESSAGE_SIZE = 256;
 
-/* class for generating sliding window and sequence for input file */
-class slidingWindow{
 
-    int cur_file_seq_num; // the newest sequence number in the buffer (latest read)
-    int capacity; // max window size
-    deque<WrappedBuffer> window_buf; // each element is a buffer with header and data
-    ifstream file;
 
-    /* push a new buffer to the end, if full, remove an old buffer in the front */
-    void enqueue(WrappedBuffer buf){
-        if (window_buf.size() == this->capacity){
-            window_buf.pop_front();
-        }
-        window_buf.push_back(buf);
-    }
+int logger(const char *filename,PacketHeader *head){
+    FILE *fp = NULL;
+    fp = fopen(filename, "a");
+    fprintf(fp,"%u %u %u %u\n",head->type,head->seqNum,head->length,head->checksum);
+    fclose(fp);
+    return 0;
+}
 
-public:
-    slidingWindow(int capacity, char* filename){
-        this->capacity = capacity;
-        file.open(filename);
-        file.seekg(0, file.beg);
-        cur_file_seq_num = 0;
-        //fill the window buffer
-        while (cur_file_seq_num < capacity && this->file.tellg() != -1){
-            forward_window();
-        }
-    }
 
-    /* get buffer of index i in the current window */
-    WrappedBuffer get_buffer(int i){
-        if (i >= window_buf.size() || i < 0){
-            cout << "invalid buffer index" << endl;
-            exit(1);
-        }
-        return window_buf[i];
-    }
+int send_start(const char *hostname, int port,const char *input,const char *log,int size) {
 
-    /* the seq num of the oldest buffer in the window (first to be sent) */
-    int get_send_seq_num(){
-        return (window_buf.size() > 0 ? window_buf.front().header.seqNum : -1);
-    }
+    srand((unsigned)time(NULL));
+    PacketHeader head;
+    head.type = 0;
+    head.seqNum = rand();
+//    printf("%d\n",head.seqNum);
+    head.length = 0;
+    int n;
 
-    int get_size(){
-        return window_buf.size();
-    }
-
-    /* keep moving window forward until buffer with seq_num is the first,
-     * same as forward_window in basic part, may be useful in bonus part */
-    int move_window_to(int seq_num){
-        while (get_send_seq_num() < seq_num){
-            if (forward_window() == -1)
-                return -1;
-        }
-        return 0;
-    }
-
-    /* move window 1 step forward */
-    int forward_window(){
-        //read 1 pieces of new data into buffer
-        if (file.tellg() != -1){
-            WrappedBuffer tmp;
-            tmp.header.seqNum = cur_file_seq_num;
-            file.read(tmp.data, WTP_DATA_SIZE);
-            tmp.header.length = file.gcount();
-            tmp.header.type = DATA;
-            tmp.header.checksum = crc32(tmp.data, tmp.header.length);
-            enqueue(tmp);
-            cur_file_seq_num++;
-            return 0;
-
-        } else if (window_buf.size() != 0){
-            window_buf.pop_front();
-            return (window_buf.size() == 0 ? -1 : 0);
-        }
+    char message[1024] = { 0 };
+    memcpy(message, &head, sizeof(head));
+    if (strlen(message) > MAX_MESSAGE_SIZE) {
+        perror("Error: Message exceeds maximum length\n");
         return -1;
     }
 
-    void close_file(){
-        file.close();
-    }
-
-};
-
-/* for sending START and END */
-void connector(int FLAG, int seqnum, int sockfd, sockaddr* addr_ptr, socklen_t* addrlen, logger &log){
-    WrappedBuffer buffer, recv_buf;
-    buffer.header.type = FLAG;
-    buffer.header.seqNum = seqnum;
-    buffer.header.length = 0;
-
-    int first_time = 1;
-    Timer timer, fin_timer;
-    timer.startTimer();
-    fin_timer.startTimer();
-    while (true) {
-        /* send data */
-        if (timer.getTime() > 0.5 || first_time){
-            print("sent", buffer.header);
-            log.record(buffer.header);
-            sendto(sockfd, &buffer, HEADER_LEN, MSG_NOSIGNAL, addr_ptr, *addrlen);
-            timer.startTimer();
-            first_time = 0;
-        }
-        /* check for ack */
-        if(recvfrom(sockfd, &recv_buf, MAX_WTP_SIZE, MSG_DONTWAIT, addr_ptr, addrlen) > 0){
-            print("received", recv_buf.header);
-            log.record(recv_buf.header);
-            if (recv_buf.header.type == 3 && recv_buf.header.seqNum == buffer.header.seqNum) {
-                break;
-            }
-        } else {
-            if (FLAG == FIN && fin_timer.getTime() > 40){
-                break;
-            }
-        }
-    }
-}
-
-/* for sending window */
-void connector(int FLAG, slidingWindow &window, int sockfd, sockaddr* addr_ptr, socklen_t* addrlen, logger &log){
-    WrappedBuffer buffer;
-
-    int ack_count = 3, window_size = window.get_size(), cur_seq_num;
-    Timer timer;
-    timer.startTimer();
-    while (true) {
-        if (ack_count == 3 || timer.getTime() > 0.5){
-            /* send all data in current window */
-            cur_seq_num = window.get_send_seq_num();
-            window_size = window.get_size(); //get current size of the window, may not be max window size
-            for (int i = 0; i < window_size; i++) {
-                WrappedBuffer tmp = window.get_buffer(i);
-                print("sent", tmp.header);
-                log.record(tmp.header);
-                sendto(sockfd, &tmp, tmp.header.length + HEADER_LEN, MSG_NOSIGNAL, addr_ptr, *addrlen);
-            }
-            timer.startTimer();
-            ack_count = 0;
-        }
-        /* look for ack */
-        if(recvfrom(sockfd, &buffer, MAX_WTP_SIZE, MSG_DONTWAIT, addr_ptr, addrlen) > 0){
-            print("received", buffer.header);
-            log.record(buffer.header);
-            if (buffer.header.type == 3){
-
-                if (buffer.header.seqNum == cur_seq_num){
-                    ack_count++; //dup ack
-                } else if (buffer.header.seqNum > cur_seq_num && buffer.header.seqNum <= cur_seq_num + window_size){
-                        if (window.move_window_to(buffer.header.seqNum) == -1)
-                            break; //no more window
-                    else {
-                            ack_count = 3; //send next window
-                    }
-                }
-            }
-        }
-    }
-    window.close_file();
-}
-
-
-void sender(char* receiver_ip, int receiver_port, int window_size, char* input_file, char* log) {
-
-    // creating a socket
+    // (1) Create a socket
     int sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    sockaddr_in addr;
-    socklen_t addrlen = sizeof(addr);
+
+    // (2) Create a sockaddr_in to specify remote host and port
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(receiver_port);
-    hostent *server = gethostbyname(receiver_ip);
-    memcpy(&addr.sin_addr, server->h_addr, server->h_length);
+    struct hostent *host = gethostbyname(hostname);
+    if (host == nullptr) {
+        fprintf(stderr, "%s: unknown host\n", hostname);
+        return -1;
+    }
+    memcpy(&(addr.sin_addr), host->h_addr, host->h_length);
+    addr.sin_port = htons(port);
 
-    //random number generation (a bit confused whether it is random or set to 0)
-    mt19937 mt(time(nullptr));
-    int conn_num = mt();
 
-    slidingWindow sliding_window(window_size, input_file);
-    logger logfile(log);
+    // (4) Send message to remote server
+    // Call send() enough times to send all the data
+    socklen_t sock_len;
+    sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+    logger(log,&head);
 
-    //send a START message and wait for ack
-    connector(START, conn_num, sockfd, (sockaddr*)&addr, &addrlen, logfile);
+    printf("Start request sent.\n");
+    char buf[1024] = { 0 };
+    n = recvfrom(sockfd, (char *)buf, 1024,
+                 MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
+    buf[n] = '\0';
 
-    //send data
-    connector(DATA, sliding_window, sockfd, (sockaddr*)&addr, &addrlen, logfile);
+    PacketHeader *ack = (PacketHeader*)buf;
+//    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
+    logger(log,ack);
+    if(ack->type == 3 && head.seqNum == ack->seqNum) {
+        printf("Connection start!\n");
 
-    //send a END message
-    connector(FIN, conn_num, sockfd, (sockaddr*)&addr, &addrlen, logfile);
+    }else{
+        // (5) Close connection
+        printf("Start failed.\n");
+        close(sockfd);
+    }
 
+
+
+
+
+
+
+
+    int packet_length = 1472 - sizeof(head);
+
+    std::ifstream is (input, std::ifstream::binary);
+
+    // get length of file:
+    is.seekg(0, is.end);
+    int length = is.tellg();
+    is.seekg(0, is.beg);
+    int packets_num = 0;
+    if(length%packet_length != 0){
+        packets_num = length/packet_length+1;
+    }else{
+        packets_num = length/packet_length;
+    }
+
+    printf("packet_num is %d\n",packets_num);
+    char packets[2000][1472];
+
+    char *buffer = new char[packet_length];
+
+    // read data as a block:
+    int flag = 0;
+    while (true) {
+        is.read(buffer, packet_length);
+        if(!is){
+            break;
+        }
+        for(int i=0;i<1456;i++){
+            packets[flag][i] = buffer[i];
+        }
+//        printf("%s\n",packets[flag]);
+        flag++;
+    }
+    int last_len = is.gcount();
+    printf("%d\n",last_len);
+    buffer[last_len] = '\0';
+    for(int i=0;i<is.gcount();i++){
+        packets[flag][i] = buffer[i];
+    }
+//    printf("Final packet only have %ld\n", is.gcount());
+    is.close();
+    printf("Begin sent.\n");
+
+    int seqNum = 0;
+    while(true){
+        int sent_msg = 0;
+        for(int i=0;i<size;i++){
+            if(seqNum >= packets_num){
+                break;
+            }
+            PacketHeader header;
+            header.seqNum = seqNum;
+            header.type = 2;
+            header.length = 1456;
+            if(seqNum == packets_num-1){
+                header.length = last_len;
+            }
+            header.checksum = crc32(packets[seqNum],header.length);
+            char message[1472] = {0};
+            memcpy(message, &header, sizeof(header));
+
+            for(int k = 16;k<1472;k++){
+                message[k] = packets[seqNum][k-16];
+            }
+            //printf("%s\n",packets[seqNum]);
+            sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+            logger(log,&header);
+
+            seqNum ++;
+            sent_msg++;
+            if(seqNum >= packets_num){
+                break;
+            }
+        }
+
+        auto start = system_clock::now();
+        socklen_t len = sizeof(addr);
+        while(true){
+            char packet_ack[1024] = { 0 };
+            int n = recvfrom(sockfd, (char *)packet_ack, 1024,
+                             MSG_DONTWAIT, ( struct sockaddr *) &addr, &len);
+
+            auto end   = system_clock::now();
+            auto duration = duration_cast<milliseconds>(end - start);
+            if(double(duration.count())>500){
+                seqNum -= sent_msg;
+                break;
+            }
+            if(n == -1){
+                continue;
+            }else{
+                packet_ack[n] = '\0';
+                PacketHeader *ack_head = (PacketHeader*)packet_ack;
+                seqNum =  ack_head->seqNum;
+                logger(log,ack_head);
+            }
+        }
+
+
+//        int seq_list[WINDOWS]  = {0};
+//        auto start = system_clock::now();
+//        int flag = 0;
+//        while(flag<sent_msg){
+//            socklen_t len = sizeof(addr);
+//            char packet_ack[1024] = { 0 };
+//            int n = recvfrom(sockfd, (char *)packet_ack, 1024,
+//                             MSG_NOSIGNAL, ( struct sockaddr *) &addr, &len);
+//            packet_ack[n] = '\0';
+//            PacketHeader *ack_head = (PacketHeader*)packet_ack;
+//            if(ack_head->seqNum<=seqNum-sent_msg){
+//                continue;
+//            }
+//
+//            seq_list[flag] =  ack_head->seqNum;
+//            flag ++;
+//            auto end   = system_clock::now();
+//            auto duration = duration_cast<microseconds>(end - start);
+//            if(double(duration.count())>500){
+//                break;
+//            }
+//        }
+//
+//
+//        int maxValue = *max_element(seq_list,seq_list+WINDOWS);
+//        if(maxValue == 0){
+//            maxValue = seqNum;
+//
+//        }
+//        printf("seqNUm %d\n", maxValue);
+//        seqNum = maxValue;
+//        printf("seq is %d\n",seqNum);
+        if(seqNum >= packets_num){
+            break;
+        }
+
+    }
+    head.type = 1;
+    char end[1024] = { 0 };
+    memcpy(end, &head, sizeof(head));
+    sendto(sockfd, end, sizeof(end), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+    logger(log,&head);
+    while(true){
+        char end_ack[1024] = { 0 };
+        n = recvfrom(sockfd, (char *)end_ack, 1024,
+                     MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
+        end_ack[n] = '\0';
+
+        PacketHeader *ack_message = (PacketHeader*)end_ack;
+//    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
+        if(ack_message->type == 3 && head.seqNum == ack_message->seqNum) {
+            logger(log,ack_message);
+            printf("Connection end!\n");
+            break;
+        }
+    }
+    close(sockfd);
+
+
+
+    return 0;
 }
 
-int main(int argc, const char **argv) {
-    int ip_len = strlen(argv[1]);
-    char *receiver_ip = new char[ip_len + 1];
-    strcpy(receiver_ip, argv[1]);
+int main(int argc, const char **argv){
+    const char *hostname = argv[1];
+    int port = atoi(argv[2]);
+    int size = atoi(argv[3]);
+    const char *input = argv[4];
+    const char *log = argv[5];
 
-    int receiver_port = atoi(argv[2]);
-
-    int window_size = atoi(argv[3]);
-
-    int input_file_len = strlen(argv[4]);
-    char *input_file = new char[input_file_len + 1];
-    strcpy(input_file, argv[4]);
-
-    int log_len = strlen(argv[5]);
-    char *log = new char[log_len + 1];
-    strcpy(log, argv[5]);
-
-    sender(receiver_ip, receiver_port, window_size, input_file, log);
+//    send_start(hostname, port);
+    send_start(hostname,port, input,log, size);
+    return 0;
 }

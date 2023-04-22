@@ -172,18 +172,25 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
 
         auto start = system_clock::now();
         socklen_t len = sizeof(addr);
-        char packet_ack[1024] = { 0 };
-        int n = recvfrom(sockfd, (char *)packet_ack, 1024,
-                         MSG_NOSIGNAL, ( struct sockaddr *) &addr, &len);
-        packet_ack[n] = '\0';
-        PacketHeader *ack_head = (PacketHeader*)packet_ack;
-        seqNum =  ack_head->seqNum;
-        logger(log,ack_head);
-        auto end   = system_clock::now();
-        auto duration = duration_cast<microseconds>(end - start);
-        if(double(duration.count())>500){
-            seqNum -= sent_msg;
-            continue;
+        while(true){
+            char packet_ack[1024] = { 0 };
+            int n = recvfrom(sockfd, (char *)packet_ack, 1024,
+                             MSG_DONTWAIT, ( struct sockaddr *) &addr, &len);
+
+            auto end   = system_clock::now();
+            auto duration = duration_cast<milliseconds>(end - start);
+            if(double(duration.count())>500){
+                seqNum -= sent_msg;
+                break;
+            }
+            if(n == -1){
+                continue;
+            }else{
+                packet_ack[n] = '\0';
+                PacketHeader *ack_head = (PacketHeader*)packet_ack;
+                seqNum =  ack_head->seqNum;
+                logger(log,ack_head);
+            }
         }
 
 
