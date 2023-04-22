@@ -190,6 +190,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
                 PacketHeader *ack_head = (PacketHeader*)packet_ack;
                 seqNum =  ack_head->seqNum;
                 logger(log,ack_head);
+                break;
             }
         }
 
