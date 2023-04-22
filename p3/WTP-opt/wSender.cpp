@@ -31,8 +31,8 @@ int logger(const char *filename,PacketHeader *head){
 }
 
 
-int send_start(const char *hostname, int port,const char *input,const char *log,int win_size) {
-    static const int size = win_size;
+int send_start(const char *hostname, int port,const char *input,const char *log,int size) {
+
     srand((unsigned)time(NULL));
     PacketHeader head;
     head.type = 0;
@@ -137,7 +137,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
         if(seqNum>=packets_num){
             break;
         }
-        int need_ack[size]  = {0};
+        int need_ack[20]  = {0};
         for(int k=0;k<size;k++){
             need_ack[k] = -1;
         }
