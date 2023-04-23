@@ -73,7 +73,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
     printf("Start request sent.\n");
     char buf[1024] = { 0 };
     n = recvfrom(sockfd, (char *)buf, 1024,
-             MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
+             MSG_NOSIGNAL, (struct sockaddr *) &addr, &sock_len);
     buf[n] = '\0';
 
     PacketHeader *ack = (PacketHeader*)buf;

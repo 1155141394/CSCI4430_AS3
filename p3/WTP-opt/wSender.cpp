@@ -261,7 +261,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
     while(true){
         char end_ack[1024] = { 0 };
         n = recvfrom(sockfd, (char *)end_ack, 1024,
-                     MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
+                     MSG_NOSIGNAL, (struct sockaddr *) &addr, &sock_len);
         end_ack[n] = '\0';
 
         PacketHeader *ack_message = (PacketHeader*)end_ack;
