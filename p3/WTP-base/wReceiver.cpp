@@ -263,7 +263,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                         for(int i = 0; i < len; i++){
                             data[recv_header->seqNum][i] = msg[header_len + i];
                         }
-                        data[len] = '\0';
+                        data[recv_header->seqNum][len] = '\0';
 
                         checksum = crc32(data[recv_header->seqNum], len);
                         if (checksum != recv_header -> checksum) {
