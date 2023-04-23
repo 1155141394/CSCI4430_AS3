@@ -151,7 +151,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                     }
                     data[recv_header->seqNum][len] = '\0';
 
-                    checksum = crc32(data[recv_header->seqNum], len);
+                    checksum = crc32(data[recv_header->seqNum], data_len[recv_header->seqNum]);
                     if (checksum != recv_header -> checksum) {
                         memset(data[recv_header->seqNum], 0, len);
                         continue;
