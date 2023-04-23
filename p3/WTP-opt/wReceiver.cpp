@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include<cstdio>
 #include "../starter_files/crc32.h"
 #include "../starter_files/PacketHeader.h"
 
@@ -78,6 +79,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
 
         char store_file_dir[30] = {0};
         sprintf(store_file_dir, "%s/FILE-%d.out", store_dir, count);
+        remove(store_file_dir);
         // receive datagram from client
 
         char msg[2000] = { 0 };
