@@ -221,7 +221,8 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
         char ack[1024] = { 0 };
         ack_header.type = 3;
         ack_header.length = 0;
-        char data[2000] = {0};
+        char data[2000][2000] = {0};
+        int data_len[2000] = {0};
         char recv_header_msg[100] = {0};
         int seq_num = -1;
         unsigned int checksum = 0;
@@ -229,7 +230,6 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
         while(1){
             int count = 0;
             for(int i = 0; i < window_size; i++){
-                memset(data, 0, 2000);
 //            printf("Start for loop.\n");
                 // receive data from sender
                 memset(msg, 0, 2000);
@@ -261,26 +261,18 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                     if (recv_header->seqNum == seq_num + 1) {
                         // get out the data part
                         for(int i = 0; i < len; i++){
-                            data[i] = msg[header_len + i];
+                            data[recv_header->seqNum][i] = msg[header_len + i];
                         }
                         data[len] = '\0';
-//            printf("Data: %s\n", data);
-                        checksum = crc32(data, len);
+
+                        checksum = crc32(data[recv_header->seqNum], len);
                         if (checksum != recv_header -> checksum) {
+                            memset(data[recv_header->seqNum], 0, len);
                             continue;
                         }
                         seq_num = recv_header->seqNum;
-
+                        data_len[recv_header->seqNum] = len;
                         // store the data in a txt file
-                        ofstream stream;
-                        stream.open(store_file_dir, std::ios_base::app); // open file stream
-                        if( !stream )
-                            cout << "Opening file failed" << endl;
-//                        printf("%ld, %d\n", strlen(data), seq_num);
-                        stream.write(data, len); // write char * into file stream
-                        if( !stream )
-                            cout << "Write failed" << endl;
-                        stream.close();
 
                     }
                     else {
@@ -310,6 +302,17 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
 
 
         }
+        ofstream stream;
+        stream.open(store_file_dir, std::ios_base::app); // open file stream
+        if( !stream )
+            cout << "Opening file failed" << endl;
+//                        printf("%ld, %d\n", strlen(data), seq_num);
+        for (int i = 0; i <= seq_num; i++){
+            stream.write(data[i], data_len[i]);
+        }
+        if( !stream )
+            cout << "Write failed" << endl;
+        stream.close();
         count += 1;
     }
 
