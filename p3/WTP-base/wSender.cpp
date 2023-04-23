@@ -67,25 +67,26 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
     // (4) Send message to remote server
     // Call send() enough times to send all the data
     socklen_t sock_len;
-    sendto(sockfd, message, sizeof(message), MSG_DONTWAIT, (const struct sockaddr *) &addr, sizeof(addr));
-    logger(log,&head);
+    while(true){
+        sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+        logger(log,&head);
 
-    printf("Start request sent.\n");
-    char buf[1024] = { 0 };
-    n = recvfrom(sockfd, (char *)buf, 1024,
-             MSG_NOSIGNAL, (struct sockaddr *) &addr, &sock_len);
-    buf[n] = '\0';
+        printf("Start request sent.\n");
+        char buf[1024] = { 0 };
+        n = recvfrom(sockfd, (char *)buf, 1024,
+                     MSG_NOSIGNAL, (struct sockaddr *) &addr, &sock_len);
+        buf[n] = '\0';
 
-    PacketHeader *ack = (PacketHeader*)buf;
+        PacketHeader *ack = (PacketHeader*)buf;
 //    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
-    logger(log,ack);
-    if(ack->type == 3 && head.seqNum == ack->seqNum) {
-        printf("Connection start!\n");
+        logger(log,ack);
+        if(ack->type == 3 && head.seqNum == ack->seqNum) {
+            printf("Connection start!\n");
+            break;
 
-    }else{
-        // (5) Close connection
-        printf("Start failed.\n");
-        close(sockfd);
+        }else{
+            continue;
+        }
     }
 
 
@@ -226,7 +227,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
     while(true){
         char end_ack[1024] = { 0 };
         n = recvfrom(sockfd, (char *)end_ack, 1024,
-                     MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
+                     MSG_NOSIGNAL, (struct sockaddr *) &addr, &sock_len);
         end_ack[n] = '\0';
 
         PacketHeader *ack_message = (PacketHeader*)end_ack;
@@ -235,6 +236,9 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
             logger(log,ack_message);
             printf("Connection end!\n");
             break;
+        }else{
+            sendto(sockfd, end, sizeof(end), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+            logger(log,&head);
         }
     }
     close(sockfd);
