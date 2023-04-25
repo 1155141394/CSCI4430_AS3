@@ -187,7 +187,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
 
         }
         ofstream stream;
-        stream.open(store_file_dir, std::ios_base::app); // open file stream
+        stream.open(store_file_dir); // open file stream
         if( !stream )
             cout << "Opening file failed" << endl;
 //                        printf("%ld, %d\n", strlen(data), seq_num);
