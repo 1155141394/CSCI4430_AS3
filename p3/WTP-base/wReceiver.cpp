@@ -254,6 +254,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                     logger(log_dir, recv_header);
                     // check if the connection is end
                     if (recv_header->type == 1) {
+
                         end_seq = recv_header -> seqNum;
                         break;
                     }
@@ -284,15 +285,20 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
             }
 
             // The connection is not end and ask for new packages
-            if (end_seq == -1 and count > 0) {
+//            if (end_seq == -1 and count > 0) {
                 ack_header.seqNum = seq_num + 1;
                 memcpy(ack, &ack_header, sizeof(*head));
                 sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
                 logger(log_dir, &ack_header);
-            }
+//            }
 
                 // The connection is finished
-            else if (end_seq != -1) {
+            if (end_seq != -1) {
+//                ack_header.seqNum = seq_num + 1;
+//                memcpy(ack, &ack_header, sizeof(*head));
+//                sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
+//                logger(log_dir, &ack_header);
+
                 ack_header.seqNum = end_seq;
                 logger(log_dir, &ack_header);
                 memcpy(ack, &ack_header, sizeof(*head));
