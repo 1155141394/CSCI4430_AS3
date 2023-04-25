@@ -74,12 +74,15 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
     socklen_t len;
     int n;
     len = sizeof(cliaddr);
+    char all_store_file_dir[30] = {0};
+    sprintf(all_store_file_dir, "%s/FILE-*", store_dir);
+    remove(all_store_file_dir);
     int count = 0;
     while (1) {
 
         char store_file_dir[30] = {0};
         sprintf(store_file_dir, "%s/FILE-%d.out", store_dir, count);
-        remove(store_file_dir);
+
         // receive datagram from client
 
         char msg[2000] = { 0 };
@@ -147,7 +150,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                 }
 
                 else if ((recv_header->type == 2) and (int(recv_header->seqNum) > seq_num) and (int(recv_header->seqNum) <= (seq_num + window_size))) {
-//                    printf("%d, %d, %d\n", recv_header->seqNum, recv_header->type, recv_header->length);
+                    printf("%d, %d, %d\n", recv_header->seqNum, recv_header->type, recv_header->length);
                     for(int i = 0; i < len; i++){
                         data[recv_header->seqNum][i] = msg[header_len + i];
                     }
