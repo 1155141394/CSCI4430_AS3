@@ -74,9 +74,9 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
     socklen_t len;
     int n;
     len = sizeof(cliaddr);
-    char all_store_file_dir[30] = {0};
-    sprintf(all_store_file_dir, "%s/FILE-%d.out", store_dir, 0);
-    remove(all_store_file_dir);
+//    char all_store_file_dir[30] = {0};
+//    sprintf(all_store_file_dir, "%s/FILE-%d.out", store_dir, 0);
+//    remove(all_store_file_dir);
     int count = 0;
     while (1) {
 
