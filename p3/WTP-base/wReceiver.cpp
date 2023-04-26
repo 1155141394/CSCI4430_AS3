@@ -198,23 +198,29 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
         // receive datagram from client
 
         char msg[2000] = { 0 };
-        n = recvfrom(sockfd, (char *)msg, 1024,
-                     MSG_WAITALL, ( struct sockaddr *) &cliaddr, &len);
-        msg[n] = '\0';
+        while (1) {
+            n = recvfrom(sockfd, (char *)msg, 1024,
+                         MSG_WAITALL, ( struct sockaddr *) &cliaddr, &len);
+            msg[n] = '\0';
 
-        PacketHeader *head = (PacketHeader*)msg;
-        logger(log_dir, head);
-        int header_len = sizeof(*head);
-        if(head->type == 0){
-            head->type = 3;
-//        printf("%d\n",head->seqNum);
-            // 首先需要定义一个变量
-            char ack[1024] = { 0 };
+            PacketHeader *head = (PacketHeader*)msg;
             logger(log_dir, head);
-            memcpy(ack, head, sizeof(*head));
-            sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
+            int header_len = sizeof(*head);
+            if(head->type == 0){
+                head->type = 3;
+//        printf("%d\n",head->seqNum);
+                // 首先需要定义一个变量
+                char ack[1024] = { 0 };
+                logger(log_dir, head);
+                memcpy(ack, head, sizeof(*head));
+                sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
 //            printf("ack back!\n");
+            }
+            else {
+                break;
+            }
         }
+
 
 //     Start receive data
         PacketHeader ack_header;
@@ -258,12 +264,6 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                         end_seq = recv_header -> seqNum;
                         break;
                     }
-//                    else if (recv_header->type == 0) {
-//                        ack_header.seqNum = recv_header->seqNum;
-//                        memcpy(ack, &ack_header, sizeof(*head));
-//                        sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
-//                        logger(log_dir, &ack_header);
-//                    }
 
                     if (recv_header->seqNum == seq_num + 1) {
                         // get out the data part
