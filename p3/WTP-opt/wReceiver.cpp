@@ -158,7 +158,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
 
                     checksum = crc32(data[recv_header->seqNum], len);
                     if (checksum != recv_header -> checksum) {
-                        memset(data[recv_header->seqNum], 0, len);
+                        memset(data[recv_header->seqNum], 0, 2000);
                         continue;
                     }
 
@@ -191,7 +191,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
         if( !stream )
             cout << "Opening file failed" << endl;
 //                        printf("%ld, %d\n", strlen(data), seq_num);
-        for (int i = 0; i <= seq_num; i++) {
+        for (int i = 0; i <= seq_num + count;i++) {
             stream.write(data[i], data_len[i]); // write char * into file stream
         }
         if( !stream )
