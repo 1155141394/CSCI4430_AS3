@@ -265,27 +265,15 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
         }
 
     }
-
+    head.type = 1;
+    char end[1024] = { 0 };
+    memcpy(end, &head, sizeof(head));
+    sendto(sockfd, end, sizeof(end), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+    logger(log,&head);
     while(true){
-        head.type = 1;
-        char end[1024] = { 0 };
-        memcpy(end, &head, sizeof(head));
-        sendto(sockfd, end, sizeof(end), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
-        logger(log,&head);
-        auto start = system_clock::now();
-        while(true) {
-            auto end = system_clock::now();
-            auto duration = duration_cast<milliseconds>(end - start);
-            if (double(duration.count()) > 100) {
-                break;
-            }
-        }
         char end_ack[1024] = { 0 };
         n = recvfrom(sockfd, (char *)end_ack, 1024,
-                     MSG_DONTWAIT, (struct sockaddr *) &addr, &sock_len);
-        if(n==-1){
-            continue;
-        }
+                     MSG_NOSIGNAL, (struct sockaddr *) &addr, &sock_len);
         end_ack[n] = '\0';
 
         PacketHeader *ack_message = (PacketHeader*)end_ack;
