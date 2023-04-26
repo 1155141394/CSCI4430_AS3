@@ -258,12 +258,12 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                         end_seq = recv_header -> seqNum;
                         break;
                     }
-                    else if (recv_header->type == 0) {
-                        ack_header.seqNum = recv_header->seqNum;
-                        memcpy(ack, &ack_header, sizeof(*head));
-                        sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
-                        logger(log_dir, &ack_header);
-                    }
+//                    else if (recv_header->type == 0) {
+//                        ack_header.seqNum = recv_header->seqNum;
+//                        memcpy(ack, &ack_header, sizeof(*head));
+//                        sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
+//                        logger(log_dir, &ack_header);
+//                    }
 
                     if (recv_header->seqNum == seq_num + 1) {
                         // get out the data part
