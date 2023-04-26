@@ -148,7 +148,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                     sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
                     break;
                 }
-                else if ((int(recv_header->seqNum) > seq_num)) {
+                else if ((int(recv_header->seqNum) <= seq_num)) {
                     ack_header.seqNum = recv_header->seqNum;
                     logger(log_dir, &ack_header);
                     memcpy(ack, &ack_header, sizeof(*head));
