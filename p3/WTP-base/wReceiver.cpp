@@ -293,7 +293,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
             }
 
                 // The connection is finished
-            if (end_seq != -1) {
+            else if (end_seq != -1) {
 //                ack_header.seqNum = seq_num + 1;
 //                memcpy(ack, &ack_header, sizeof(*head));
 //                sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
