@@ -71,10 +71,19 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
         sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
         logger(log,&head);
 
+        auto start = system_clock::now();
+        while(true) {
+            auto end = system_clock::now();
+            auto duration = duration_cast<milliseconds>(end - start);
+            if (double(duration.count()) > 500) {
+                break;
+            }
+        }
+
         printf("Start request sent.\n");
         char buf[1024] = { 0 };
         n = recvfrom(sockfd, (char *)buf, 1024,
-                     MSG_NOSIGNAL, (struct sockaddr *) &addr, &sock_len);
+                     MSG_DONTWAIT, (struct sockaddr *) &addr, &sock_len);
         buf[n] = '\0';
 
         PacketHeader *ack = (PacketHeader*)buf;
