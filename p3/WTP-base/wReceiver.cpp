@@ -258,8 +258,14 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                         end_seq = recv_header -> seqNum;
                         break;
                     }
+                    else if (recv_header->type == 0) {
+                        ack_header.seqNum = recv_header->seqNum;
+                        memcpy(ack, &ack_header, sizeof(*head));
+                        sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
+                        logger(log_dir, &ack_header);
+                    }
 
-                    if (recv_header->seqNum == seq_num + 1) {
+                    else if (recv_header->seqNum == seq_num + 1) {
                         // get out the data part
                         for(int i = 0; i < len; i++){
                             data[recv_header->seqNum][i] = msg[header_len + i];
@@ -286,10 +292,10 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
 
             // The connection is not end and ask for new packages
             if (end_seq == -1 and count > 0) {
-            ack_header.seqNum = seq_num + 1;
-            memcpy(ack, &ack_header, sizeof(*head));
-            sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
-            logger(log_dir, &ack_header);
+                ack_header.seqNum = seq_num + 1;
+                memcpy(ack, &ack_header, sizeof(*head));
+                sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
+                logger(log_dir, &ack_header);
             }
 
                 // The connection is finished
