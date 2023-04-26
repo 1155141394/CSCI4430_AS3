@@ -75,7 +75,7 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
         while(true) {
             auto end = system_clock::now();
             auto duration = duration_cast<milliseconds>(end - start);
-            if (double(duration.count()) > 500) {
+            if (double(duration.count()) > 100) {
                 break;
             }
         }
@@ -84,6 +84,9 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
         char buf[1024] = { 0 };
         n = recvfrom(sockfd, (char *)buf, 1024,
                      MSG_DONTWAIT, (struct sockaddr *) &addr, &sock_len);
+        if(n==-1){
+            continue;
+        }
         buf[n] = '\0';
 
         PacketHeader *ack = (PacketHeader*)buf;
