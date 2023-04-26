@@ -217,29 +217,6 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
 //            printf("ack back!\n");
         }
 
-        while (1) {
-            n = recvfrom(sockfd, (char *)msg, 1024,
-                         MSG_WAITALL, ( struct sockaddr *) &cliaddr, &len);
-            msg[n] = '\0';
-
-            PacketHeader *head = (PacketHeader*)msg;
-            logger(log_dir, head);
-            int header_len = sizeof(*head);
-            if(head->type == 0){
-                head->type = 3;
-//        printf("%d\n",head->seqNum);
-                // 首先需要定义一个变量
-                char ack[1024] = { 0 };
-                logger(log_dir, head);
-                memcpy(ack, head, sizeof(*head));
-                sendto(sockfd, ack, sizeof(ack), MSG_NOSIGNAL, (const struct sockaddr *) &cliaddr, sizeof(cliaddr));
-//            printf("ack back!\n");
-            }
-            else{
-                break;
-            }
-        }
-
 //     Start receive data
         PacketHeader ack_header;
         char ack[1024] = { 0 };
