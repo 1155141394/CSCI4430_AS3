@@ -67,27 +67,39 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
     // (4) Send message to remote server
     // Call send() enough times to send all the data
     socklen_t sock_len;
-    sendto(sockfd, message, sizeof(message), MSG_DONTWAIT, (const struct sockaddr *) &addr, sizeof(addr));
-    logger(log,&head);
+    while(true){
+        sendto(sockfd, message, sizeof(message), MSG_NOSIGNAL, (const struct sockaddr *) &addr, sizeof(addr));
+        logger(log,&head);
 
-    printf("Start request sent.\n");
-    char buf[1024] = { 0 };
-    n = recvfrom(sockfd, (char *)buf, 1024,
-             MSG_WAITALL, (struct sockaddr *) &addr, &sock_len);
-    buf[n] = '\0';
+        auto start = system_clock::now();
+        while(true) {
+            auto end = system_clock::now();
+            auto duration = duration_cast<milliseconds>(end - start);
+            if (double(duration.count()) > 100) {
+                break;
+            }
+        }
 
-    PacketHeader *ack = (PacketHeader*)buf;
+        printf("Start request sent.\n");
+        char buf[1024] = { 0 };
+        n = recvfrom(sockfd, (char *)buf, 1024,
+                     MSG_DONTWAIT, (struct sockaddr *) &addr, &sock_len);
+        if(n==-1){
+            continue;
+        }
+        buf[n] = '\0';
+
+        PacketHeader *ack = (PacketHeader*)buf;
 //    printf("%d, %d, %d\n", ack->type, ack->seqNum, head.seqNum);
-    logger(log,ack);
-    if(ack->type == 3 && head.seqNum == ack->seqNum) {
-        printf("Connection start!\n");
+        logger(log,ack);
+        if(ack->type == 3 && head.seqNum == ack->seqNum) {
+            printf("Connection start!\n");
+            break;
 
-    }else{
-        // (5) Close connection
-        printf("Start failed.\n");
-        close(sockfd);
+        }else{
+            continue;
+        }
     }
-
 
 
 
