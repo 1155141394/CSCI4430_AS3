@@ -265,7 +265,7 @@ int run_server(int port, int queue_size, int window_size, char * store_dir, cons
                         logger(log_dir, &ack_header);
                     }
 
-                    else if (recv_header->seqNum == seq_num + 1) {
+                    if (recv_header->seqNum == seq_num + 1) {
                         // get out the data part
                         for(int i = 0; i < len; i++){
                             data[recv_header->seqNum][i] = msg[header_len + i];
