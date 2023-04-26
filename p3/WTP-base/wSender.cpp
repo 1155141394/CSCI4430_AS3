@@ -177,21 +177,55 @@ int send_start(const char *hostname, int port,const char *input,const char *log,
             }
         }
 
+
         auto start = system_clock::now();
-        socklen_t len = sizeof(addr);
-        char packet_ack[1024] = { 0 };
-        int n = recvfrom(sockfd, (char *)packet_ack, 1024,
-                         MSG_NOSIGNAL, ( struct sockaddr *) &addr, &len);
-        packet_ack[n] = '\0';
-        PacketHeader *ack_head = (PacketHeader*)packet_ack;
-        seqNum =  ack_head->seqNum;
-        logger(log,ack_head);
-        auto end   = system_clock::now();
-        auto duration = duration_cast<milliseconds>(end - start);
-        if(double(duration.count())>500){
-            seqNum -= sent_msg;
-            continue;
+        while (true) {
+            auto end = system_clock::now();
+            auto duration = duration_cast<milliseconds>(end - start);
+            if (double(duration.count()) > 500) {
+                seqNum -= sent_msg;
+                break;
+            }
+            socklen_t len = sizeof(addr);
+            char packet_ack[1024] = { 0 };
+            int n = recvfrom(sockfd, (char *)packet_ack, 1024,
+                             MSG_DONTWAIT, ( struct sockaddr *) &addr, &len);
+            if(n==-1){
+                continue;
+            }
+            packet_ack[n] = '\0';
+            PacketHeader *ack_head = (PacketHeader*)packet_ack;
+            if(ack_head->seqNum == head.seqNum){
+                logger(log,ack_head);
+                continue;
+            }
+            seqNum =  ack_head->seqNum;
+            logger(log,ack_head);
+            break;
         }
+
+
+
+
+
+//        auto start = system_clock::now();
+//        socklen_t len = sizeof(addr);
+//        char packet_ack[1024] = { 0 };
+//        int n = recvfrom(sockfd, (char *)packet_ack, 1024,
+//                         MSG_NOSIGNAL, ( struct sockaddr *) &addr, &len);
+//        packet_ack[n] = '\0';
+//        PacketHeader *ack_head = (PacketHeader*)packet_ack;
+//        if(ack_head->seqNum == head.seqNum){
+//            continue;
+//        }
+//        seqNum =  ack_head->seqNum;
+//        logger(log,ack_head);
+//        auto end   = system_clock::now();
+//        auto duration = duration_cast<milliseconds>(end - start);
+//        if(double(duration.count())>500){
+//            seqNum -= sent_msg;
+//            continue;
+//        }
 
 
 //        int seq_list[WINDOWS]  = {0};
